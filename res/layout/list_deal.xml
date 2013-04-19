@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dip" >
+    
+    <RelativeLayout android:id="@+id/dealleft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true">
+        
+        <ImageView android:id="@+id/dealimage"
+            android:layout_width="50dip"
+            android:layout_height="50dip" />
+        
+        <TextView android:id="@+id/dealprice"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_below="@+id/dealimage"
+        	android:layout_alignParentLeft="@+id/dealimage" />
+        
+        <TextView android:id="@+id/dealvalue"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_below="@+id/dealprice"
+        	android:layout_alignParentLeft="@+id/dealprice" />
+        
+        <TextView android:id="@+id/dealdiscount"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_below="@+id/dealimage"
+        	android:layout_alignParentRight="@+id/dealimage" />
+        
+    </RelativeLayout>
+    
+    <TextView android:id="@+id/dealtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/dealimage"
+        android:layout_toRightOf="@+id/dealimage" />
+    
+    <ImageView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" />
+         
+</RelativeLayout>
