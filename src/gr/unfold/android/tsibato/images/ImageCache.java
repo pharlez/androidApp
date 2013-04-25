@@ -24,8 +24,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
@@ -72,8 +75,21 @@ public class ImageCache {
     
     private HashSet<SoftReference<Bitmap>> mReusableBitmaps;
     
-    public ImageCache(ImageCacheParams cacheParams) {
+    private ImageCache(ImageCacheParams cacheParams) {
     	init(cacheParams);
+    }
+    
+    public static ImageCache getInstance(FragmentManager fragmentManager, ImageCacheParams cacheParams) {
+    	final RetainFragment mRetainFragment = findOrCreateRetainFragment(fragmentManager);
+    	
+    	ImageCache imageCache = (ImageCache) mRetainFragment.getObject();
+    	
+    	if (imageCache == null) {
+    		imageCache = new ImageCache(cacheParams);
+    		mRetainFragment.setObject(imageCache);
+    	}
+    	
+    	return imageCache;
     }
     
     /** Initialise the cache, providing all parameters. */
@@ -404,6 +420,17 @@ public class ImageCache {
 		final String cacheDir = "/Android/data/" + context.getPackageName() + "/cache/";
 		return new File(Environment.getExternalStorageDirectory().getPath() + cacheDir);
 	}
+	
+	private static RetainFragment findOrCreateRetainFragment(FragmentManager fm) {
+		RetainFragment mRetainFragment = (RetainFragment) fm.findFragmentByTag(TAG);
+		
+		if (mRetainFragment == null) {
+			mRetainFragment = new RetainFragment();
+			fm.beginTransaction().add(mRetainFragment, TAG).commitAllowingStateLoss();
+		}
+		
+		return mRetainFragment;
+	}
     
     public static class ImageCacheParams {
     	public int memCacheSize = DEFAULT_MEM_CACHE_SIZE;
@@ -419,5 +446,34 @@ public class ImageCache {
     		diskCacheDir = getDiskCacheDir(context, diskCacheDirectoryName);
     	}
     	
+    	public void setMemCacheSizePercent(float percent) {
+            if (percent < 0.05f || percent > 0.8f) {
+                throw new IllegalArgumentException("setMemCacheSizePercent - percent must be "
+                        + "between 0.05 and 0.8 (inclusive)");
+            }
+            memCacheSize = Math.round(percent * Runtime.getRuntime().maxMemory() / 1024);
+        }
+    	
+    }
+    
+    public static class RetainFragment extends Fragment {
+    	private Object mObject;
+    	
+    	public RetainFragment() {}
+    	
+    	@Override
+    	public void onCreate(Bundle savedInstanceState) {
+    		super.onCreate(savedInstanceState);
+    		
+    		setRetainInstance(true);
+    	}
+    	
+    	public void setObject(Object object) {
+    		mObject = object;
+    	}
+    	
+    	public Object getObject() {
+    		return mObject;
+    	}
     }
 }

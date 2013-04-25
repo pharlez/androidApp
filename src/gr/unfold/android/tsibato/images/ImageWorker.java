@@ -29,6 +29,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -92,6 +93,21 @@ public abstract class ImageWorker {
            
            task.execute(data);
 	   }
+   }
+   
+   public void setLoadingImage(int resId) {
+	   mLoadingBitmap = BitmapFactory.decodeResource(mResources, resId);
+   }
+   
+   public void addImageCache(FragmentManager fragmentManager, ImageCache.ImageCacheParams cacheParams) {
+	   mImageCacheParams = cacheParams;
+	   mImageCache = ImageCache.getInstance(fragmentManager, mImageCacheParams);
+	   new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
+   }
+   
+   public void setExitTasksEarly(boolean exitTasksEarly) {
+       mExitTasksEarly = exitTasksEarly;
+       setPauseWork(false);
    }
    
   /** Main method for subclasses to override to define any processing that must happen to produce
