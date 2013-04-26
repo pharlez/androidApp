@@ -4,5 +4,8 @@
     <string name="app_name">Tsibato</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="euro_symbol">&#8364;</string>
+    <string name="from_value">από</string>
+    <string name="percent">&#37;</string>
 
 </resources>

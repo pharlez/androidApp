@@ -3,7 +3,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">0dp</dimen>
     <dimen name="activity_vertical_margin">0dp</dimen>
-    <dimen name="image_thumbnail_height">58dp</dimen>
-    <dimen name="image_thumbnail_width">78dp</dimen>
+    <dimen name="image_thumbnail_height">92dp</dimen>
+    <dimen name="image_thumbnail_width">123dp</dimen>
 
 </resources>

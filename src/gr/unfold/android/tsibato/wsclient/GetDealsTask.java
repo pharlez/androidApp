@@ -78,8 +78,8 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     			double dealLat = Double.parseDouble(dealItem.getPrimitivePropertySafelyAsString("Lat"));
     			double dealMapZoom = Double.parseDouble(dealItem.getPrimitivePropertySafelyAsString("MapZoom"));
     			
-    			Log.i(TAG, String.format(" --> ID: %d, desc: %s, url: %s, no: %d, p: %f, v: %f, disc: %f, long: %f, lat: %f, zoom: %f.", 
-    					dealId, dealTitle, dealThumbnail, dealPurchases, dealPrice, dealValue, dealDiscount, dealLong, dealLat, dealMapZoom));
+    			//Log.i(TAG, String.format(" --> ID: %d, desc: %s, url: %s, no: %d, p: %f, v: %f, disc: %f, long: %f, lat: %f, zoom: %f.", 
+    			//		dealId, dealTitle, dealThumbnail, dealPurchases, dealPrice, dealValue, dealDiscount, dealLong, dealLat, dealMapZoom));
     			
     			result.add(new Deal(dealId, dealTitle, dealThumbnail, dealThumbnail, dealPurchases, BigDecimal.valueOf(dealPrice), BigDecimal.valueOf(dealValue), BigDecimal.valueOf(dealDiscount), dealLong, dealLat, dealMapZoom));
     		}

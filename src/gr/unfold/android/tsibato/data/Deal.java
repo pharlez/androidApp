@@ -91,7 +91,7 @@ public class Deal implements Parcelable {
 	}
 
 	public String getThumbnail() {
-		return thumbnail;
+		return thumbnail.replace("_78x58", "");
 	}
 
 	public String getProviderLogo() {

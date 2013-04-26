@@ -1,6 +1,10 @@
 package gr.unfold.android.tsibato.adapter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -48,9 +52,16 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 		
 		Deal deal = getItem(position);
 		
-		price.setText(deal.getPrice().toString());
-		value.setText(deal.getValue().toString());
-		discount.setText(deal.getDiscount().toString());
+		NumberFormat nf_fr = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+		
+		BigDecimal p = deal.getPrice().setScale(2, RoundingMode.HALF_UP);
+		price.setText(nf_fr.format(p));
+		
+		BigDecimal v = deal.getValue().setScale(2, RoundingMode.HALF_UP);
+		value.setText(mContext.getString(R.string.from_value) + " " + nf_fr.format(v));
+		
+		discount.setText("-" + deal.getDiscount().setScale(0, RoundingMode.HALF_UP).toString() + mContext.getString(R.string.percent));
+		
 		title.setText(deal.getTitle());
 		
 		mImageFetcher.loadImage(deal.getThumbnail(), imageView);
