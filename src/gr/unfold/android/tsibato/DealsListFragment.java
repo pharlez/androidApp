@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 import gr.unfold.android.tsibato.images.ImageFetcher;
 import gr.unfold.android.tsibato.images.ImageCache.ImageCacheParams;
@@ -47,8 +51,34 @@ public class DealsListFragment extends ListFragment {
         mImageFetcher.addImageCache(getActivity().getSupportFragmentManager(), cacheParams);
 		
         mAdapter = new DealsAdapter(getActivity(), deals, mImageFetcher);
-		// have to get data into an ArrayList<Deal> to pass to the list adapter
-		setListAdapter(mAdapter);
+		
+		//setListAdapter(mAdapter);
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) 
+	{
+	    super.onActivityCreated(savedInstanceState);
+	    
+	    setListAdapter(mAdapter);
+	    
+	    getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+			
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				// Pause fetcher to ensure smoother scrolling when flinging
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
+                    mImageFetcher.setPauseWork(true);
+                } else {
+                    mImageFetcher.setPauseWork(false);
+                }
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+			}
+		});
 	}
 	
 	@Override

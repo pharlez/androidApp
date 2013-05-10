@@ -3,6 +3,7 @@ package gr.unfold.android.tsibato.wsclient;
 import java.util.ArrayList;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.SoapFault;
@@ -81,7 +82,9 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     			//Log.i(TAG, String.format(" --> ID: %d, desc: %s, url: %s, no: %d, p: %f, v: %f, disc: %f, long: %f, lat: %f, zoom: %f.", 
     			//		dealId, dealTitle, dealThumbnail, dealPurchases, dealPrice, dealValue, dealDiscount, dealLong, dealLat, dealMapZoom));
     			
-    			result.add(new Deal(dealId, dealTitle, dealThumbnail, dealThumbnail, dealPurchases, BigDecimal.valueOf(dealPrice), BigDecimal.valueOf(dealValue), BigDecimal.valueOf(dealDiscount), dealLong, dealLat, dealMapZoom));
+    			result.add(new Deal(dealId, dealTitle, dealThumbnail, dealThumbnail, dealPurchases, 
+    					BigDecimal.valueOf(dealPrice).setScale(2, RoundingMode.HALF_UP), BigDecimal.valueOf(dealValue).setScale(2, RoundingMode.HALF_UP), 
+    					BigDecimal.valueOf(dealDiscount).setScale(0, RoundingMode.HALF_UP), dealLong, dealLat, dealMapZoom));
     		}
     	}
     	

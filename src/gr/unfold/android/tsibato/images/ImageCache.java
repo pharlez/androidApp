@@ -452,6 +452,9 @@ public class ImageCache {
                         + "between 0.05 and 0.8 (inclusive)");
             }
             memCacheSize = Math.round(percent * Runtime.getRuntime().maxMemory() / 1024);
+            if (BuildConfig.DEBUG) {
+    			Log.d(TAG, "Memory Cache Size: " + memCacheSize);
+    		}
         }
     	
     }

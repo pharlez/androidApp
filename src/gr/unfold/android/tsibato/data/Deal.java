@@ -1,22 +1,25 @@
 package gr.unfold.android.tsibato.data;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Deal implements Parcelable {
 	
-	private int id;
-	private String title;
-	private String thumbnail;
-	private String providerLogo;
-	private int purchases;
-	private BigDecimal price;
-	private BigDecimal value;
-	private BigDecimal discount;
-	private double lon;
-	private double lat;
-	private double mapZoom;
+	public int id;
+	public String title;
+	public String thumbnail;
+	public String providerLogo;
+	public int purchases;
+	public BigDecimal price;
+	public BigDecimal value;
+	public BigDecimal discount;
+	public double lon;
+	public double lat;
+	public double mapZoom;
 	
 	public Deal(int id, String title, String thumb, String logo, int purchases, BigDecimal price, BigDecimal value, BigDecimal discount,
 			double lon, double lat, double zoom) {

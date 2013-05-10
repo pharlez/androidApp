@@ -23,20 +23,35 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 	
 	private LayoutInflater inflater;
 	private Context mContext;
-	private ImageFetcher mImageFetcher; 
+	private ImageFetcher mImageFetcher;
+	
+//	private static List<Deal> mDeals;
 	
 	public DealsAdapter(Context context, List<Deal> objects, ImageFetcher imageFetcher) {
 		super(context, android.R.layout.simple_list_item_1, objects);
 		
 		mContext = context;
 		mImageFetcher = imageFetcher;
+//		mDeals = objects;
 		inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		ViewHolder viewHolder;
+		
 		if (convertView == null) {
-			convertView = inflater.inflate(R.layout.list_deal, null);			
+			convertView = inflater.inflate(R.layout.list_deal, null);
+			
+			viewHolder = new ViewHolder();
+			viewHolder.priceView = (TextView)convertView.findViewById(R.id.dealprice);
+			viewHolder.valueView = (TextView)convertView.findViewById(R.id.dealvalue);
+			viewHolder.discountView = (TextView)convertView.findViewById(R.id.dealdiscount);
+			viewHolder.titleView = (TextView)convertView.findViewById(R.id.dealtitle);
+			
+			convertView.setTag(viewHolder);
+		} else {
+			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		
 		ImageView imageView = (ImageView)convertView.findViewById(R.id.dealimage);
@@ -45,26 +60,32 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		}
 		
-		TextView price = (TextView)convertView.findViewById(R.id.dealprice);
-		TextView value = (TextView)convertView.findViewById(R.id.dealvalue);
-		TextView discount = (TextView)convertView.findViewById(R.id.dealdiscount);
-		TextView title = (TextView)convertView.findViewById(R.id.dealtitle);
+//		TextView price = (TextView)convertView.findViewById(R.id.dealprice);
+//		TextView value = (TextView)convertView.findViewById(R.id.dealvalue);
+//		TextView discount = (TextView)convertView.findViewById(R.id.dealdiscount);
+//		TextView title = (TextView)convertView.findViewById(R.id.dealtitle);
 		
 		Deal deal = getItem(position);
+//		Deal deal = mDeals.get(position);
+//		String[] data = deal.data;
+		
+		mImageFetcher.loadImage(deal.thumbnail, imageView);
 		
 		NumberFormat nf_fr = NumberFormat.getCurrencyInstance(Locale.FRANCE);
 		
-		BigDecimal p = deal.getPrice().setScale(2, RoundingMode.HALF_UP);
-		price.setText(nf_fr.format(p));
+		//BigDecimal p = deal.price.setScale(2, RoundingMode.HALF_UP);
+		viewHolder.priceView.setText(nf_fr.format(deal.price));
+//		viewHolder.priceView.setText("50,00");
 		
-		BigDecimal v = deal.getValue().setScale(2, RoundingMode.HALF_UP);
-		value.setText(mContext.getString(R.string.from_value) + " " + nf_fr.format(v));
+		//BigDecimal v = deal.value.setScale(2, RoundingMode.HALF_UP);
+		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + nf_fr.format(deal.value));
+//		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + "500,00");
 		
-		discount.setText("-" + deal.getDiscount().setScale(0, RoundingMode.HALF_UP).toString() + mContext.getString(R.string.percent));
+		viewHolder.discountView.setText("-" + deal.discount + mContext.getString(R.string.percent));
+//		viewHolder.discountView.setText("-" + "90" + mContext.getString(R.string.percent));
 		
-		title.setText(deal.getTitle());
-		
-		mImageFetcher.loadImage(deal.getThumbnail(), imageView);
+		viewHolder.titleView.setText(deal.title);
+//		viewHolder.titleView.setText("Fucking hell is this working smoothly now");		
 		
 		//TextView lineView = (TextView)convertView.findViewById(android.R.id.text1);
 		
@@ -73,5 +94,12 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 		
 		return convertView;
 	}
-
+	
+	static class ViewHolder {
+		TextView priceView;
+		TextView valueView;
+		TextView discountView;
+		TextView titleView;
+	}
+	
 }

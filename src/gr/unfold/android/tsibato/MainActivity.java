@@ -15,6 +15,7 @@ import gr.unfold.android.tsibato.async.AsyncTaskListener;
 import gr.unfold.android.tsibato.async.IProgressTracker;
 import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
+import gr.unfold.android.tsibato.util.Utils;
 
 public class MainActivity extends FragmentActivity {
 	
@@ -24,6 +25,9 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		if (BuildConfig.DEBUG) {
+            Utils.enableStrictMode();
+        }
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
