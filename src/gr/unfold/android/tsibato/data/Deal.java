@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Html;
 
 public class Deal implements Parcelable {
 	
@@ -24,7 +25,7 @@ public class Deal implements Parcelable {
 	public Deal(int id, String title, String thumb, String logo, int purchases, BigDecimal price, BigDecimal value, BigDecimal discount,
 			double lon, double lat, double zoom) {
 		this.id = id;
-		this.title = title;
+		this.title = Html.fromHtml(title).toString();
 		this.thumbnail = thumb;
 		this.providerLogo = logo;
 		this.purchases = purchases;
@@ -84,6 +85,16 @@ public class Deal implements Parcelable {
 	                return new Deal[size];
 	            }
 	        };
+	        
+	public String getSmallTitle(int length) {
+		String title = this.title;
+		if (title.length() <= length) {
+			return title;
+		}
+		String res = title.substring(0, length - 1);
+		res = res.substring(0, res.lastIndexOf(" "));
+		return res + "...";
+	}
 
 	public int getId() {
 		return id;

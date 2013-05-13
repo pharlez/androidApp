@@ -2,11 +2,13 @@ package gr.unfold.android.tsibato.adapter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,8 @@ import gr.unfold.android.tsibato.images.ImageFetcher;
 import gr.unfold.android.tsibato.views.RecyclingImageView;
 
 public class DealsAdapter extends ArrayAdapter<Deal> {
+	
+	private final int[] bgColors = new int[] { R.color.list_white, R.color.list_gray };
 	
 	private LayoutInflater inflater;
 	private Context mContext;
@@ -54,6 +58,9 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		
+		int colorPosition = position % bgColors.length;
+        convertView.setBackgroundResource(bgColors[colorPosition]);
+		
 		ImageView imageView = (ImageView)convertView.findViewById(R.id.dealimage);
 		if (imageView == null) {
 			imageView = new RecyclingImageView(mContext);
@@ -71,20 +78,22 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 		
 		mImageFetcher.loadImage(deal.thumbnail, imageView);
 		
-		NumberFormat nf_fr = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+		DecimalFormat nf_fr = (DecimalFormat) NumberFormat.getInstance(Locale.FRANCE);
+		nf_fr.setMinimumFractionDigits(2);
+		nf_fr.setMaximumFractionDigits(2);
 		
 		//BigDecimal p = deal.price.setScale(2, RoundingMode.HALF_UP);
-		viewHolder.priceView.setText(nf_fr.format(deal.price));
+		viewHolder.priceView.setText(nf_fr.format(deal.price) + mContext.getString(R.string.euro_symbol));
 //		viewHolder.priceView.setText("50,00");
 		
 		//BigDecimal v = deal.value.setScale(2, RoundingMode.HALF_UP);
-		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + nf_fr.format(deal.value));
+		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + nf_fr.format(deal.value) + mContext.getString(R.string.euro_symbol));
 //		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + "500,00");
 		
 		viewHolder.discountView.setText("-" + deal.discount + mContext.getString(R.string.percent));
 //		viewHolder.discountView.setText("-" + "90" + mContext.getString(R.string.percent));
 		
-		viewHolder.titleView.setText(deal.title);
+		viewHolder.titleView.setText(deal.getSmallTitle(300));
 //		viewHolder.titleView.setText("Fucking hell is this working smoothly now");		
 		
 		//TextView lineView = (TextView)convertView.findViewById(android.R.id.text1);

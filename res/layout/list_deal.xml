@@ -18,7 +18,7 @@
         android:id="@+id/dealimage"
         android:layout_width="@dimen/image_thumbnail_width"
         android:layout_height="@dimen/image_thumbnail_height"
-        android:layout_marginBottom="6dp" />
+        android:layout_marginBottom="5dp" />
 
     <TextView
         android:id="@+id/dealprice"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/dealimage"
-        android:paddingLeft="5dp"
+        android:paddingLeft="3dp"
         android:textColor="#01466d"
         android:textIsSelectable="true"
         android:textSize="19sp"
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/dealprice"
-        android:paddingLeft="6dp"
+        android:paddingLeft="4dp"
         android:textColor="#8b8b8b"
         android:textIsSelectable="true"
         android:textSize="10sp"
@@ -52,7 +52,7 @@
         android:layout_height="36dp"
         android:layout_alignRight="@+id/dealimage"
         android:layout_below="@+id/dealimage"
-        android:layout_marginRight="3dp"
+        android:layout_marginRight="0dp"
         android:background="@drawable/discount"
         android:gravity="center"
         android:padding="0dp"
@@ -74,14 +74,18 @@
         android:layout_alignTop="@+id/dealimage"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/dealimage"
+        android:layout_toLeftOf="@+id/dealarrow"
         android:textColor="#555555"
         android:textIsSelectable="true"
-        android:textSize="10.5sp" />
+        android:textSize="11sp" />
 
     <ImageView
+        android:id="@+id/dealarrow"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        android:paddingLeft="8dp"
+        android:src="@drawable/ic_arrow" />
 
 </RelativeLayout>
