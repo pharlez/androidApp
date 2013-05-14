@@ -1,14 +1,11 @@
 package gr.unfold.android.tsibato.adapter;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,7 +75,7 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 		
 		mImageFetcher.loadImage(deal.thumbnail, imageView);
 		
-		DecimalFormat nf_fr = (DecimalFormat) NumberFormat.getInstance(Locale.FRANCE);
+		DecimalFormat nf_fr = (DecimalFormat) NumberFormat.getInstance(new Locale("el"));
 		nf_fr.setMinimumFractionDigits(2);
 		nf_fr.setMaximumFractionDigits(2);
 		

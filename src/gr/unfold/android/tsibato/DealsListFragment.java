@@ -27,6 +27,8 @@ public class DealsListFragment extends ListFragment {
 	private ImageFetcher mImageFetcher;
 	private DealsAdapter mAdapter;
 	
+	protected OnDealSelectedListener mCallback;
+	
 	public DealsListFragment() { }
 	
 	@Override
@@ -81,6 +83,15 @@ public class DealsListFragment extends ListFragment {
 		});
 	}
 	
+	 @Override
+	 public void onListItemClick(ListView l, View v, int position, long id) {
+		 // Notify the parent activity of selected item
+	     mCallback.onDealSelected(position);
+	        
+	     // Set the item as checked to be highlighted when in two-pane layout
+	     getListView().setItemChecked(position, true);
+	}
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -112,8 +123,15 @@ public class DealsListFragment extends ListFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		
-		// logic for onAttach here
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception.
+        try {
+            mCallback = (OnDealSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnDealSelectedListener");
+        }
 	}
 	
 }

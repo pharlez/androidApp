@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.widget.Toast;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.util.Log;
 
 import gr.unfold.android.tsibato.async.AsyncTaskListener;
@@ -17,16 +18,19 @@ import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
 import gr.unfold.android.tsibato.util.Utils;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity
+		implements OnDealSelectedListener {
 	
 	private static final String TAG = MainActivity.class.getName();
 	
 	private ProgressDialog progressDialog;
+	
+	private ArrayList<Deal> mDeals;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (BuildConfig.DEBUG) {
-            Utils.enableStrictMode();
+            //Utils.enableStrictMode();
         }
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -41,7 +45,7 @@ public class MainActivity extends FragmentActivity {
             // then we don't need to do anything and should return or else
             // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
-                return;
+            	return;
             }
 
             getDeals();
@@ -55,6 +59,7 @@ public class MainActivity extends FragmentActivity {
 
 			@Override
             public void onTaskCompleteSuccess(ArrayList<Deal> result) {
+				mDeals = result;
                 displayDeals(result);
             }
 
@@ -95,6 +100,35 @@ public class MainActivity extends FragmentActivity {
                 .add(R.id.fragment_container, listFragment).commit();
 	}
 	
+	public void onDealSelected(int position) {
+		Intent intent = new Intent(this, DealActivity.class);
+		intent.putExtra("DEAL_PARCEL", mDeals.get(position));
+		startActivity(intent);
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	  super.onSaveInstanceState(savedInstanceState);
+	  // Save UI state changes to the savedInstanceState.
+	  // This bundle will be passed to onCreate if the process is
+	  // killed and restarted.
+	  savedInstanceState.putParcelableArrayList("DEALS_PARCEL_ARRAY", mDeals);
+	  // etc.
+	}
+	
+//	@Override
+//	public void onRestoreInstanceState(Bundle savedInstanceState) {
+//	  super.onRestoreInstanceState(savedInstanceState);
+//	  // Restore UI state from the savedInstanceState.
+//	  // This bundle has also been passed to onCreate.
+//	  mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
+//	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+	}
+	
 	@Override
     protected void onResume() {
         super.onResume();
@@ -106,7 +140,7 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+		//getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 	

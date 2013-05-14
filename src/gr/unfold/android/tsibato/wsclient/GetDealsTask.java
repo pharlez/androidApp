@@ -71,6 +71,7 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     			int dealId = Integer.parseInt(dealItem.getPrimitivePropertySafelyAsString("Id"));
     			String dealTitle = dealItem.getPrimitivePropertySafelyAsString("Title");
     			String dealThumbnail = dealItem.getPrimitivePropertySafelyAsString("Thumbnail");
+    			String providerLogo = dealItem.getPrimitivePropertySafelyAsString("ProviderLogo");
     			int dealPurchases = Integer.parseInt(dealItem.getPrimitivePropertySafelyAsString("Purchases"));
     			double dealPrice = Double.parseDouble(dealItem.getPrimitivePropertySafelyAsString("Price"));
     			double dealValue = Double.parseDouble(dealItem.getPrimitivePropertySafelyAsString("Value"));
@@ -79,10 +80,7 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     			double dealLat = Double.parseDouble(dealItem.getPrimitivePropertySafelyAsString("Lat"));
     			double dealMapZoom = Double.parseDouble(dealItem.getPrimitivePropertySafelyAsString("MapZoom"));
     			
-    			//Log.i(TAG, String.format(" --> ID: %d, desc: %s, url: %s, no: %d, p: %f, v: %f, disc: %f, long: %f, lat: %f, zoom: %f.", 
-    			//		dealId, dealTitle, dealThumbnail, dealPurchases, dealPrice, dealValue, dealDiscount, dealLong, dealLat, dealMapZoom));
-    			
-    			result.add(new Deal(dealId, dealTitle, dealThumbnail, dealThumbnail, dealPurchases, 
+    			result.add(new Deal(dealId, dealTitle, dealThumbnail, providerLogo, dealPurchases, 
     					BigDecimal.valueOf(dealPrice).setScale(2, RoundingMode.HALF_UP), BigDecimal.valueOf(dealValue).setScale(2, RoundingMode.HALF_UP), 
     					BigDecimal.valueOf(dealDiscount).setScale(0, RoundingMode.HALF_UP), dealLong, dealLat, dealMapZoom));
     		}
