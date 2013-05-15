@@ -107,22 +107,22 @@ public class MainActivity extends FragmentActivity
 	}
 	
 	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-	  super.onSaveInstanceState(savedInstanceState);
+	protected void onSaveInstanceState(Bundle savedInstanceState) {
 	  // Save UI state changes to the savedInstanceState.
 	  // This bundle will be passed to onCreate if the process is
 	  // killed and restarted.
 	  savedInstanceState.putParcelableArrayList("DEALS_PARCEL_ARRAY", mDeals);
-	  // etc.
+	  
+	  super.onSaveInstanceState(savedInstanceState);
 	}
 	
-//	@Override
-//	public void onRestoreInstanceState(Bundle savedInstanceState) {
-//	  super.onRestoreInstanceState(savedInstanceState);
-//	  // Restore UI state from the savedInstanceState.
-//	  // This bundle has also been passed to onCreate.
-//	  mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
-//	}
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+	  super.onRestoreInstanceState(savedInstanceState);
+	  // Restore UI state from the savedInstanceState.
+	  // This bundle has also been passed to onCreate.
+	  mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
+	}
 	
 	@Override
 	protected void onPause() {
@@ -148,7 +148,7 @@ public class MainActivity extends FragmentActivity
     	this.progressDialog = new ProgressDialog(this);
         this.progressDialog.setCancelable(false);
         this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        this.progressDialog.setMessage("Hey");
+        this.progressDialog.setMessage(getString(R.string.loading_msg));
     }
 	
 	private void showToastMessage(int messageId) {

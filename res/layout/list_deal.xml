@@ -6,14 +6,6 @@
     android:orientation="horizontal"
     android:padding="8dp">
 
-    <!-- <RelativeLayout android:id="@+id/dealleft" -->
-    <!-- android:layout_width="wrap_content" -->
-    <!-- android:layout_height="wrap_content" -->
-    <!-- android:layout_alignParentLeft="true"> -->
-
-
-    <!-- </RelativeLayout> -->
-
     <ImageView
         android:id="@+id/dealimage"
         android:layout_width="@dimen/image_thumbnail_width"
@@ -30,7 +22,7 @@
         android:focusable="false"
         android:textColor="#01466d"
         android:textIsSelectable="false"
-        android:textSize="19sp"
+        android:textSize="19dp"
         android:textStyle="bold"
         android:singleLine="true" />
 
@@ -44,7 +36,7 @@
 		android:focusable="false"
         android:textColor="#8b8b8b"
         android:textIsSelectable="false"
-        android:textSize="10sp"
+        android:textSize="10dp"
         android:singleLine="true"
         tools:ignore="SmallSp" />
 
@@ -55,7 +47,7 @@
         android:layout_alignRight="@+id/dealimage"
         android:layout_below="@+id/dealimage"
         android:layout_marginRight="0dp"
-        android:background="@drawable/discount"
+        android:background="@drawable/discount_light"
         android:gravity="center"
         android:padding="0dp"
         android:shadowColor="#ffffff"
@@ -65,7 +57,7 @@
         android:focusable="false"
         android:textColor="#7cadad"
         android:textIsSelectable="false"
-        android:textSize="11.5sp"
+        android:textSize="11.5dp"
         android:textStyle="bold"
         android:singleLine="true"
         android:includeFontPadding="false" />
@@ -81,7 +73,8 @@
         android:focusable="false"
         android:textColor="#555555"
         android:textIsSelectable="false"
-        android:textSize="11sp" />
+        android:textSize="11sp"
+        tools:ignore="SmallSp" />
 
     <ImageView
         android:id="@+id/dealarrow"

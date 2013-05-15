@@ -75,16 +75,16 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 		
 		mImageFetcher.loadImage(deal.thumbnail, imageView);
 		
-		DecimalFormat nf_fr = (DecimalFormat) NumberFormat.getInstance(new Locale("el"));
-		nf_fr.setMinimumFractionDigits(2);
-		nf_fr.setMaximumFractionDigits(2);
+		DecimalFormat nf_el = (DecimalFormat) NumberFormat.getInstance(new Locale("el"));
+		nf_el.setMinimumFractionDigits(2);
+		nf_el.setMaximumFractionDigits(2);
 		
 		//BigDecimal p = deal.price.setScale(2, RoundingMode.HALF_UP);
-		viewHolder.priceView.setText(nf_fr.format(deal.price) + mContext.getString(R.string.euro_symbol));
+		viewHolder.priceView.setText(nf_el.format(deal.price) + mContext.getString(R.string.euro_symbol));
 //		viewHolder.priceView.setText("50,00");
 		
 		//BigDecimal v = deal.value.setScale(2, RoundingMode.HALF_UP);
-		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + nf_fr.format(deal.value) + mContext.getString(R.string.euro_symbol));
+		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + nf_el.format(deal.value) + mContext.getString(R.string.euro_symbol));
 //		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + "500,00");
 		
 		viewHolder.discountView.setText("-" + deal.discount + mContext.getString(R.string.percent));
