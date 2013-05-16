@@ -18,7 +18,7 @@ import gr.unfold.android.tsibato.adapter.DealsAdapter;
 import gr.unfold.android.tsibato.data.Deal;
 
 public class DealsListFragment extends ListFragment {
-	private static final String TAG = "ImageGridFragment";
+	private static final String TAG = "DealsListFragment";
     private static final String IMAGE_CACHE_DIR = "images";
     
 	private int mImageHeight;

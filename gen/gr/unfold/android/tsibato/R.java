@@ -34,16 +34,18 @@ public final class R {
         public static final int ic_arrow=0x7f020002;
         public static final int ic_launcher=0x7f020003;
         public static final int list_selector=0x7f020004;
-        public static final int price_bar=0x7f020005;
+        public static final int pattern=0x7f020005;
+        public static final int pricebar_background=0x7f020006;
+        public static final int pricebar_pattern=0x7f020007;
     }
     public static final class id {
         public static final int action_settings=0x7f090008;
         public static final int dealarrow=0x7f090007;
         public static final int dealdiscount=0x7f090004;
-        public static final int dealimage=0x7f090006;
+        public static final int dealimage=0x7f090005;
         public static final int dealprice=0x7f090002;
         public static final int dealpricebar=0x7f090001;
-        public static final int dealtitle=0x7f090005;
+        public static final int dealtitle=0x7f090006;
         public static final int dealvalue=0x7f090003;
         public static final int fragment_container=0x7f090000;
     }
@@ -65,6 +67,7 @@ public final class R {
         public static final int percent=0x7f060006;
     }
     public static final class style {
+        public static final int ActionBar=0x7f070002;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -78,7 +81,6 @@ public final class R {
         Base application theme for API 11+. This theme completely replaces
         AppBaseTheme from res/values/styles.xml on API 11+ devices.
     
- API 11 theme customizations can go here. 
 
         Base application theme for API 14+. This theme completely replaces
         AppBaseTheme from BOTH res/values/styles.xml and

@@ -9,7 +9,7 @@
         android:id="@+id/dealpricebar"
         android:layout_width="fill_parent"
         android:layout_height="52dp"
-        android:background="@color/item_orange"
+        android:background="@drawable/pricebar_background"
         android:paddingBottom="6dp"
         android:paddingLeft="20dp"
         android:paddingRight="10dp"
@@ -38,7 +38,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
-	        android:layout_below="@+id/dealprice"
+	        android:layout_below="@id/dealprice"
 	        android:focusable="false"
 	        android:includeFontPadding="false"
 	        android:shadowColor="#000000"
@@ -75,15 +75,23 @@
         
 	</RelativeLayout>
     
+    <ImageView
+        android:id="@+id/dealimage"
+        android:layout_width="@dimen/image_thumbnail_width"
+        android:layout_height="@dimen/image_thumbnail_height"
+        android:layout_marginTop="18dp"
+        android:layout_marginLeft="18dp" />
+    
     <TextView
         android:id="@+id/dealtitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:focusable="false"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="30dp"
         android:textColor="#555555"
-        android:textIsSelectable="false"
-        android:textSize="11sp"
-        tools:ignore="SmallSp" />
+        android:textIsSelectable="true"
+        android:textSize="11.5sp"
+        tools:ignore="SmallSp"/>
     
 </LinearLayout>

@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/dealimage"
+        android:layout_below="@id/dealimage"
         android:paddingLeft="3dp"
         android:focusable="false"
         android:textColor="#01466d"
@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/dealprice"
+        android:layout_below="@id/dealprice"
         android:paddingLeft="4dp"
 		android:focusable="false"
         android:textColor="#8b8b8b"
@@ -44,8 +44,8 @@
         android:id="@+id/dealdiscount"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:layout_alignRight="@+id/dealimage"
-        android:layout_below="@+id/dealimage"
+        android:layout_alignRight="@id/dealimage"
+        android:layout_below="@id/dealimage"
         android:layout_marginRight="0dp"
         android:background="@drawable/discount_light"
         android:gravity="center"
@@ -61,21 +61,7 @@
         android:textStyle="bold"
         android:singleLine="true"
         android:includeFontPadding="false" />
-
-    <TextView
-        android:id="@+id/dealtitle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/dealimage"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/dealimage"
-        android:layout_toLeftOf="@+id/dealarrow"
-        android:focusable="false"
-        android:textColor="#555555"
-        android:textIsSelectable="false"
-        android:textSize="11sp"
-        tools:ignore="SmallSp" />
-
+	
     <ImageView
         android:id="@+id/dealarrow"
         android:layout_width="wrap_content"
@@ -84,5 +70,19 @@
         android:layout_centerVertical="true"
         android:paddingLeft="8dp"
         android:src="@drawable/ic_arrow" />
+    
+    <TextView
+        android:id="@+id/dealtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/dealimage"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/dealimage"
+        android:layout_toLeftOf="@+id/dealarrow"
+        android:focusable="false"
+        android:textColor="#555555"
+        android:textIsSelectable="false"
+        android:textSize="11sp"
+        tools:ignore="SmallSp" />
 
 </RelativeLayout>
