@@ -8,12 +8,12 @@
     <RelativeLayout
         android:id="@+id/dealpricebar"
         android:layout_width="fill_parent"
-        android:layout_height="52dp"
+        android:layout_height="54dp"
         android:background="@drawable/pricebar_background"
-        android:paddingBottom="6dp"
+        android:paddingBottom="7dp"
         android:paddingLeft="20dp"
         android:paddingRight="10dp"
-        android:paddingTop="6dp" >
+        android:paddingTop="7dp" >
         
         <TextView
             android:id="@+id/dealprice"
