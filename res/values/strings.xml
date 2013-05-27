@@ -8,5 +8,6 @@
     <string name="euro_symbol">&#8364;</string>
     <string name="from_value">από</string>
     <string name="percent">&#37;</string>
+    <string name="shareTitle">Share</string>
 
 </resources>
