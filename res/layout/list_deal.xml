@@ -78,7 +78,7 @@
         android:layout_alignTop="@id/dealimage"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/dealimage"
-        android:layout_toLeftOf="@+id/dealarrow"
+        android:layout_toLeftOf="@id/dealarrow"
         android:focusable="false"
         android:textColor="#555555"
         android:textIsSelectable="false"

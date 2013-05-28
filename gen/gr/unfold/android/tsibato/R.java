@@ -11,9 +11,12 @@ public final class R {
     public static final class attr {
     }
     public static final class color {
-        public static final int black=0x7f040003;
-        public static final int item_orange=0x7f040002;
+        public static final int black=0x7f040004;
+        public static final int item_orange=0x7f040003;
+        public static final int item_selector_even=0x7f040005;
+        public static final int item_selector_odd=0x7f040006;
         public static final int list_gray=0x7f040001;
+        public static final int list_transparent=0x7f040002;
         public static final int list_white=0x7f040000;
     }
     public static final class dimen {

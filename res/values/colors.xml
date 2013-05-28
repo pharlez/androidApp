@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <color name="list_white">#ffffff</color>
+    <color name="list_white">#ffffffff</color>
     <color name="list_gray">#00fafafa</color>
+    <color name="list_transparent">#00ffffff</color>
     <color name="item_orange">#ff602b</color>
     <color name="black">#000000</color>
 </resources>

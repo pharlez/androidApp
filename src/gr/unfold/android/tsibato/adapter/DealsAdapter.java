@@ -55,8 +55,14 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		
-		int colorPosition = position % bgColors.length;
-        convertView.setBackgroundResource(bgColors[colorPosition]);
+//		int colorPosition = position % bgColors.length;
+//        convertView.setBackgroundResource(bgColors[colorPosition]);
+		if (position % 2 == 0) {
+			convertView.setBackgroundColor(mContext.getResources().getColor(R.color.item_selector_odd));
+		} else {
+			convertView.setBackgroundColor(mContext.getResources().getColor(R.color.item_selector_even));
+		}
+        
 		
 		ImageView imageView = (ImageView)convertView.findViewById(R.id.dealimage);
 		if (imageView == null) {
