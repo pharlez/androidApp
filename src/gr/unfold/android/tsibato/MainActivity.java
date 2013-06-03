@@ -37,6 +37,8 @@ public class MainActivity extends FragmentActivity
 		
 		setProgressDialog();
 		
+		//onSearchRequested();
+		
 		// Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.fragment_container) != null) {

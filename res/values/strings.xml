@@ -9,5 +9,6 @@
     <string name="from_value">από</string>
     <string name="percent">&#37;</string>
     <string name="shareTitle">Share</string>
+    <string name="search_hint">Search deals</string>
 
 </resources>

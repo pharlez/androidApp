@@ -11,13 +11,11 @@ public final class R {
     public static final class attr {
     }
     public static final class color {
-        public static final int black=0x7f040004;
-        public static final int item_orange=0x7f040003;
-        public static final int item_selector_even=0x7f040005;
-        public static final int item_selector_odd=0x7f040006;
-        public static final int list_gray=0x7f040001;
-        public static final int list_transparent=0x7f040002;
-        public static final int list_white=0x7f040000;
+        public static final int black=0x7f050004;
+        public static final int item_orange=0x7f050003;
+        public static final int list_gray=0x7f050001;
+        public static final int list_transparent=0x7f050002;
+        public static final int list_white=0x7f050000;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -31,11 +29,11 @@ public final class R {
     
  <dimen name="activity_horizontal_margin">128dp</dimen> 
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
-        public static final int image_thumbnail_height=0x7f050002;
-        public static final int image_thumbnail_width=0x7f050003;
-        public static final int radius_corner_button=0x7f050004;
+        public static final int activity_horizontal_margin=0x7f060000;
+        public static final int activity_vertical_margin=0x7f060001;
+        public static final int image_thumbnail_height=0x7f060002;
+        public static final int image_thumbnail_width=0x7f060003;
+        public static final int radius_corner_button=0x7f060004;
     }
     public static final class drawable {
         public static final int discount_dark=0x7f020000;
@@ -47,24 +45,28 @@ public final class R {
         public static final int ic_share=0x7f020006;
         public static final int item_btn_state=0x7f020007;
         public static final int item_button=0x7f020008;
-        public static final int item_share=0x7f020009;
-        public static final int pattern=0x7f02000a;
-        public static final int pricebar_background=0x7f02000b;
-        public static final int pricebar_pattern=0x7f02000c;
+        public static final int item_selector_even=0x7f020009;
+        public static final int item_selector_odd=0x7f02000a;
+        public static final int item_share=0x7f02000b;
+        public static final int pattern=0x7f02000c;
+        public static final int pricebar_background=0x7f02000d;
+        public static final int pricebar_pattern=0x7f02000e;
     }
     public static final class id {
-        public static final int action_settings=0x7f09000b;
-        public static final int dealActions=0x7f090007;
-        public static final int dealBtn=0x7f090009;
-        public static final int dealarrow=0x7f09000a;
-        public static final int dealdiscount=0x7f090004;
-        public static final int dealimage=0x7f090005;
-        public static final int dealprice=0x7f090002;
-        public static final int dealpricebar=0x7f090001;
-        public static final int dealtitle=0x7f090006;
-        public static final int dealvalue=0x7f090003;
-        public static final int fragment_container=0x7f090000;
-        public static final int shareBtn=0x7f090008;
+        public static final int action_settings=0x7f0a000d;
+        public static final int dealActions=0x7f0a0009;
+        public static final int dealBtn=0x7f0a000b;
+        public static final int dealarrow=0x7f0a000c;
+        public static final int dealdiscount=0x7f0a0006;
+        public static final int dealimage=0x7f0a0007;
+        public static final int dealprice=0x7f0a0004;
+        public static final int dealpricebar=0x7f0a0003;
+        public static final int dealtitle=0x7f0a0008;
+        public static final int dealvalue=0x7f0a0005;
+        public static final int fragment_container=0x7f0a0001;
+        public static final int searchbox=0x7f0a0000;
+        public static final int shareBtn=0x7f0a000a;
+        public static final int toolbar=0x7f0a0002;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -72,17 +74,18 @@ public final class R {
         public static final int list_deal=0x7f030002;
     }
     public static final class menu {
-        public static final int main=0x7f080000;
+        public static final int main=0x7f090000;
     }
     public static final class string {
-        public static final int action_settings=0x7f060001;
-        public static final int app_name=0x7f060000;
-        public static final int euro_symbol=0x7f060004;
-        public static final int from_value=0x7f060005;
-        public static final int loading_msg=0x7f060002;
-        public static final int no_connection=0x7f060003;
-        public static final int percent=0x7f060006;
-        public static final int shareTitle=0x7f060007;
+        public static final int action_settings=0x7f070001;
+        public static final int app_name=0x7f070000;
+        public static final int euro_symbol=0x7f070004;
+        public static final int from_value=0x7f070005;
+        public static final int loading_msg=0x7f070002;
+        public static final int no_connection=0x7f070003;
+        public static final int percent=0x7f070006;
+        public static final int search_hint=0x7f070008;
+        public static final int shareTitle=0x7f070007;
     }
     public static final class style {
         /** 
@@ -106,10 +109,13 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f080000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
+        public static final int AppTheme=0x7f080001;
+    }
+    public static final class xml {
+        public static final int searchable=0x7f040000;
     }
 }
