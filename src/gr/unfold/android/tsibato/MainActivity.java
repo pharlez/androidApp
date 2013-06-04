@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import android.app.ProgressDialog;
@@ -19,7 +23,7 @@ import gr.unfold.android.tsibato.wsclient.GetDealsTask;
 import gr.unfold.android.tsibato.util.Utils;
 
 public class MainActivity extends FragmentActivity
-		implements OnDealSelectedListener {
+		implements OnDealSelectedListener, OnScrollUpOrDownListener {
 	
 	private static final String TAG = MainActivity.class.getName();
 	
@@ -106,6 +110,17 @@ public class MainActivity extends FragmentActivity
 		Intent intent = new Intent(this, DealActivity.class);
 		intent.putExtra("DEAL_PARCEL", mDeals.get(position));
 		startActivity(intent);
+	}
+	
+	public void onScrollUp() {
+		findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
+	}
+	
+	public void onScrollDown() {
+		LinearLayout toolbar = (LinearLayout) findViewById(R.id.toolbar);
+		/*Animation slideoutAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_out);
+		toolbar.setAnimation(slideoutAnimation);*/
+		toolbar.setVisibility(View.GONE);
 	}
 	
 	@Override

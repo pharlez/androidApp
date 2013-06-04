@@ -27,7 +27,11 @@ public class DealsListFragment extends ListFragment {
 	private ImageFetcher mImageFetcher;
 	private DealsAdapter mAdapter;
 	
+	private int mPosition = 0;
+	private int mOffset = 0;
+	
 	protected OnDealSelectedListener mCallback;
+	protected OnScrollUpOrDownListener mScrollUpDown;
 	
 	public DealsListFragment() { }
 	
@@ -74,11 +78,42 @@ public class DealsListFragment extends ListFragment {
                 } else {
                     mImageFetcher.setPauseWork(false);
                 }
+                /*View child = view.getChildAt(0);
+				int topOffset = child.getTop();
+				if (topOffset < mPreviousTopOffset) {
+					mScrollUpDown.onScrollDown();
+					Log.i(TAG, "down");
+				} else if (topOffset > mPreviousTopOffset) {
+					mScrollUpDown.onScrollUp();
+					Log.i(TAG, "up");
+				}
+				mPreviousTopOffset = topOffset;*/
+                
 			}
 			
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
+				
+				int position = view.getFirstVisiblePosition();
+		        View v = view.getChildAt(0);
+		        int offset = (v == null) ? 0 : v.getTop();
+		        //Log.i(TAG,  "position: " + position + ", offset: " + offset + ", mPosition: " + mPosition + ", mOffset: " + mOffset);
+		        if (mPosition < position) {
+		        	mScrollUpDown.onScrollDown();
+					//Log.i(TAG, "down");
+		        } else if (mPosition > position){
+		        	mScrollUpDown.onScrollUp();
+					//Log.i(TAG, "up");
+		        } else {
+		        	if (mOffset < offset - 5) {
+		        		mScrollUpDown.onScrollUp();
+		        	} else if (mOffset - 5 > offset) {
+		        		mScrollUpDown.onScrollDown();
+		        	}
+		        }
+		        mPosition = position;
+		        mOffset = offset;
 			}
 		});
 	}
@@ -128,9 +163,10 @@ public class DealsListFragment extends ListFragment {
         // the callback interface. If not, it throws an exception.
         try {
             mCallback = (OnDealSelectedListener) activity;
+            mScrollUpDown = (OnScrollUpOrDownListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnDealSelectedListener");
+                    + " must implement OnDealSelectedListener and OnScrollUpOrDownListener");
         }
 	}
 	
