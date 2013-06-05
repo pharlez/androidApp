@@ -28,6 +28,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,9 +41,15 @@ public class DealActivity extends FragmentActivity {
 	
 	private ImageFetcher mImageFetcher;
 	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		if (Utils.hasHoneycomb()) {
+			ImageView view = (ImageView)findViewById(android.R.id.home);
+			view.setPadding(getResources().getDimensionPixelSize(R.dimen.action_bar_up_padding), 0, 0, 0);
+		}
 		
 		mImageHeight = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_height);
 		mImageWidth = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_width);

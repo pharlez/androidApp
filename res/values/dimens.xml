@@ -1,10 +1,14 @@
 <resources>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="action_bar_icon_top">12dp</dimen>
+    <dimen name="action_bar_icon_bottom">4dp</dimen>
+    <dimen name="action_bar_up_padding">5dp</dimen>
     <dimen name="activity_horizontal_margin">0dp</dimen>
     <dimen name="activity_vertical_margin">0dp</dimen>
     <dimen name="image_thumbnail_height">92dp</dimen>
     <dimen name="image_thumbnail_width">123dp</dimen>
     <dimen name="radius_corner_button">10dp</dimen>
+    <dimen name="scroll_animation_smoothing">3dp</dimen>
 
 </resources>

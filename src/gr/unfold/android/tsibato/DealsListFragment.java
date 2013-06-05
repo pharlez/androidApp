@@ -98,6 +98,7 @@ public class DealsListFragment extends ListFragment {
 				int position = view.getFirstVisiblePosition();
 		        View v = view.getChildAt(0);
 		        int offset = (v == null) ? 0 : v.getTop();
+		        int smoothing = getResources().getDimensionPixelSize(R.dimen.scroll_animation_smoothing);
 		        //Log.i(TAG,  "position: " + position + ", offset: " + offset + ", mPosition: " + mPosition + ", mOffset: " + mOffset);
 		        if (mPosition < position) {
 		        	mScrollUpDown.onScrollDown();
@@ -106,9 +107,9 @@ public class DealsListFragment extends ListFragment {
 		        	mScrollUpDown.onScrollUp();
 					//Log.i(TAG, "up");
 		        } else {
-		        	if (mOffset < offset - 5) {
+		        	if (mOffset < offset - smoothing) {
 		        		mScrollUpDown.onScrollUp();
-		        	} else if (mOffset - 5 > offset) {
+		        	} else if (mOffset - smoothing > offset) {
 		        		mScrollUpDown.onScrollDown();
 		        	}
 		        }

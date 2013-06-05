@@ -2,17 +2,27 @@ package gr.unfold.android.tsibato;
 
 import java.util.ArrayList;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.Toast;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
@@ -31,12 +41,14 @@ public class MainActivity extends FragmentActivity
 	
 	private ArrayList<Deal> mDeals;
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (BuildConfig.DEBUG) {
             //Utils.enableStrictMode();
         }
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.activity_main);
 		
 		setProgressDialog();
@@ -53,8 +65,16 @@ public class MainActivity extends FragmentActivity
             if (savedInstanceState != null) {
             	return;
             }
+            
+            Intent intent = getIntent();
+            if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            	String query = intent.getStringExtra(SearchManager.QUERY);
+            	//doMySearch(query);
+            } else {
+            	getDeals();
+            }
 
-            getDeals();
+            findViewById(R.id.button_list).setSelected(true);
         }
 	}
 	
@@ -104,6 +124,7 @@ public class MainActivity extends FragmentActivity
         // Add the fragment to the 'fragment_container' FrameLayout
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, listFragment).commit();
+        
 	}
 	
 	public void onDealSelected(int position) {
@@ -154,11 +175,31 @@ public class MainActivity extends FragmentActivity
         }
     }
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		//getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.main, menu);
+		
+		if (Utils.hasHoneycomb()) {
+			SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+			SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+			searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+		}
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case R.id.search:
+	        	if (!Utils.hasHoneycomb()) {
+	        		onSearchRequested();
+	        	}
+	            return true;
+	        default:
+	            return false;
+	    }
 	}
 	
 	private void setProgressDialog() {
