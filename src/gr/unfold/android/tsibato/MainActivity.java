@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.Toast;
 
 import android.annotation.TargetApi;
@@ -30,6 +31,7 @@ import gr.unfold.android.tsibato.async.AsyncTaskListener;
 import gr.unfold.android.tsibato.async.IProgressTracker;
 import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
+import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
 import gr.unfold.android.tsibato.util.Utils;
 
 public class MainActivity extends FragmentActivity
@@ -38,6 +40,8 @@ public class MainActivity extends FragmentActivity
 	private static final String TAG = MainActivity.class.getName();
 	
 	private ProgressDialog progressDialog;
+	private Menu mMenuActionBar;
+	private MenuItem mSearchMenuItem;
 	
 	private ArrayList<Deal> mDeals;
 
@@ -66,15 +70,24 @@ public class MainActivity extends FragmentActivity
             	return;
             }
             
-            Intent intent = getIntent();
-            if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            	String query = intent.getStringExtra(SearchManager.QUERY);
-            	//doMySearch(query);
-            } else {
-            	getDeals();
-            }
+            getDeals();
 
             findViewById(R.id.button_list).setSelected(true);
+        }
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		handleIntent(intent);
+	}
+	
+	private void handleIntent(Intent intent) {
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        	String query = intent.getStringExtra(SearchManager.QUERY);
+        	searchDeals(query);
+        } else {
+        	
         }
 	}
 	
@@ -92,7 +105,7 @@ public class MainActivity extends FragmentActivity
             @Override
             public void onTaskFailed(Exception cause) {
                 Log.e(TAG, cause.getMessage(), cause);
-                showToastMessage(2);
+                showToastMessage(R.string.failed_msg);
             }
 		});
 		
@@ -112,6 +125,40 @@ public class MainActivity extends FragmentActivity
 		task.execute(GetDealsTask.createRequest());
 	}
 	
+	private void searchDeals(String query) {
+		SearchDealsTask task = new SearchDealsTask();
+		
+		task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
+			
+			@Override
+			public void onTaskCompleteSuccess(ArrayList<Deal> result) {
+				mDeals = result;
+				displaySearchDeals(result);
+			}
+			
+			@Override
+			public void onTaskFailed(Exception cause) {
+				Log.e(TAG, cause.getMessage(), cause);
+				showToastMessage(R.string.failed_msg);
+			}
+		});
+		
+		task.setProgressTracker(new IProgressTracker() {
+			
+			@Override
+			public void onStartProgress() {
+				progressDialog.show();
+			}
+			
+			@Override
+			public void onStopProgress() {
+				progressDialog.dismiss();
+			}
+		});
+		
+		task.execute(SearchDealsTask.createRequest(query));
+	}
+	
 	private void displayDeals(ArrayList<Deal> results) {
 		// Create an instance of DealsListFragment
         DealsListFragment listFragment = new DealsListFragment();
@@ -122,9 +169,25 @@ public class MainActivity extends FragmentActivity
         listFragment.setArguments(bundle);
         
         // Add the fragment to the 'fragment_container' FrameLayout
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, listFragment).commit();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.fragment_container, listFragment);
+        transaction.commit();
+	}
+	
+	private void displaySearchDeals(ArrayList<Deal> results) {
+		// Create an instance of DealsListFragment
+        DealsListFragment listFragment = new DealsListFragment();
         
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", results);
+        
+        listFragment.setArguments(bundle);
+        
+        // Add the fragment to the 'fragment_container' FrameLayout
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, listFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
 	}
 	
 	public void onDealSelected(int position) {
@@ -180,12 +243,35 @@ public class MainActivity extends FragmentActivity
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		mSearchMenuItem = menu.findItem(R.id.search);
 		
 		if (Utils.hasHoneycomb()) {
 			SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-			SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+			//SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+			SearchView searchView = (SearchView) mSearchMenuItem.getActionView();
 			searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+			searchView.setOnQueryTextListener(new OnQueryTextListener() {
+
+		        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+				@Override
+		        public boolean onQueryTextSubmit(String query) {
+		            //Do nothing, results for the string supplied are already shown.
+		            //Just collapse search widget
+		        	if (Utils.hasIceCreamSandwich()) {
+		        		mSearchMenuItem.collapseActionView();
+		        	}
+		            return false;
+		        }
+
+		        @Override
+		        public boolean onQueryTextChange(String newText) {
+		            //do other stuff
+		             return false;
+		        }
+		    });
 		}
+		
+		//mMenuActionBar = menu;
 		return true;
 	}
 	
@@ -201,6 +287,20 @@ public class MainActivity extends FragmentActivity
 	            return false;
 	    }
 	}
+	
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	@Override
+	 public boolean onSearchRequested() {
+		if (Utils.hasHoneycomb()) {
+			if (Utils.hasIceCreamSandwich()) {
+				mSearchMenuItem.expandActionView();
+			}
+			return false;  // don't go ahead and show the search box
+		} else {
+			super.onSearchRequested();
+			return true;
+		}
+	 }
 	
 	private void setProgressDialog() {
     	this.progressDialog = new ProgressDialog(this);

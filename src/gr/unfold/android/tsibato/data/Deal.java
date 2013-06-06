@@ -1,14 +1,14 @@
 package gr.unfold.android.tsibato.data;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Html;
 
 public class Deal implements Parcelable {
+	
+	final static String SITE_DOMAIN = "http://www.tsibato.gr/";
 	
 	public int id;
 	public String title;
@@ -103,9 +103,13 @@ public class Deal implements Parcelable {
 	public String getTitle() {
 		return title;
 	}
+	
+	public String getLink() {
+		return SITE_DOMAIN + "d/" + this.id + "/";
+	}
 
 	public String getThumbnail() {
-		return thumbnail.replace("_78x58", "");
+		return thumbnail.replace("_78x58", "_320x240");
 	}
 
 	public String getProviderLogo() {

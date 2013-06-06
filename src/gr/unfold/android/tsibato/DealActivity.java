@@ -35,6 +35,8 @@ import android.widget.TextView;
 public class DealActivity extends FragmentActivity {
 	private static final String TAG = "DealActivity";
     private static final String IMAGE_CACHE_DIR = "images";
+    
+    private String dealUrl;
 	
 	private int mImageHeight;
 	private int mImageWidth;
@@ -51,8 +53,8 @@ public class DealActivity extends FragmentActivity {
 			view.setPadding(getResources().getDimensionPixelSize(R.dimen.action_bar_up_padding), 0, 0, 0);
 		}
 		
-		mImageHeight = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_height);
-		mImageWidth = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_width);
+		mImageHeight = getResources().getDimensionPixelSize(R.dimen.image_large_height);
+		mImageWidth = getResources().getDimensionPixelSize(R.dimen.image_large_width);
 		
 		ImageCacheParams cacheParams = new ImageCacheParams(this, IMAGE_CACHE_DIR);
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
@@ -86,12 +88,14 @@ public class DealActivity extends FragmentActivity {
 		value.setText(getString(R.string.from_value) + " " + nf_el.format(deal.value) + getString(R.string.euro_symbol));
 		discount.setText("-" + deal.discount + getString(R.string.percent));
 		
-		mImageFetcher.loadImage(deal.thumbnail, imageView);
+		mImageFetcher.loadImage(deal.getThumbnail(), imageView);
 		
 		title.setText(deal.title);
 		
 		shaveOffCorners((Button) findViewById(R.id.dealBtn));
 		shaveOffCorners((Button) findViewById(R.id.shareBtn));
+		
+		dealUrl = deal.getLink();
 		
 		//StateListDrawable stateList = (StateListDrawable) btn.getBackground();
 //		LayerDrawable layer = (LayerDrawable) btn.getBackground();
@@ -108,17 +112,17 @@ public class DealActivity extends FragmentActivity {
 	}
 	
 	public void goToWebPage(View view) {
-		String url = "http://www.google.com/";
+		String url = dealUrl;
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(url));
 		startActivity(intent);
 	}
 	
 	public void shareDeal(View view) {
-		Intent sendIntent = new Intent();
-		sendIntent.setAction(Intent.ACTION_SEND);
-		sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+		Intent sendIntent = new Intent(Intent.ACTION_SEND);
 		sendIntent.setType("text/plain");
+		sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Some Subject Line");
+		sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send " + dealUrl);
 		startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareTitle)));
 	}
 	
@@ -128,7 +132,8 @@ public class DealActivity extends FragmentActivity {
 	        case android.R.id.home:
 	            // This is called when the Home (Up) button is pressed in the Action Bar.
 	            Intent parentActivityIntent = new Intent(this, MainActivity.class);
-	            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	            //parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	            startActivity(parentActivityIntent);
 	            finish();
 	            return true;

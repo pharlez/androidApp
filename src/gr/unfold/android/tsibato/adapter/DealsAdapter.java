@@ -81,7 +81,7 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 //		Deal deal = mDeals.get(position);
 //		String[] data = deal.data;
 		
-		mImageFetcher.loadImage(deal.thumbnail, imageView);
+		mImageFetcher.loadImage(deal.getThumbnail(), imageView);
 		
 		DecimalFormat nf_el = (DecimalFormat) NumberFormat.getInstance(new Locale("el"));
 		nf_el.setMinimumFractionDigits(2);
