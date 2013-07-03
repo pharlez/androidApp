@@ -2,7 +2,10 @@ package gr.unfold.android.tsibato;
 
 import java.util.ArrayList;
 
+import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -14,6 +17,9 @@ import android.widget.ListView;
 
 import gr.unfold.android.tsibato.images.ImageFetcher;
 import gr.unfold.android.tsibato.images.ImageCache.ImageCacheParams;
+import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
+import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
+import gr.unfold.android.tsibato.util.Utils;
 import gr.unfold.android.tsibato.adapter.DealsAdapter;
 import gr.unfold.android.tsibato.data.Deal;
 
@@ -23,6 +29,8 @@ public class DealsListFragment extends ListFragment {
     
 	private int mImageHeight;
 	private int mImageWidth;
+	
+	private String mQuery;
 	
 	private ImageFetcher mImageFetcher;
 	private DealsAdapter mAdapter;
@@ -47,6 +55,10 @@ public class DealsListFragment extends ListFragment {
 		Bundle bundle = this.getArguments();
 		if (bundle != null) {
 			deals = bundle.getParcelableArrayList("DEALS_PARCEL_ARRAY");
+			String query = bundle.getString("SEARCH_QUERY");
+			if (query != null) {
+				mQuery = query;
+			}
 		}
 		
 		ImageCacheParams cacheParams = new ImageCacheParams(getActivity(), IMAGE_CACHE_DIR);
@@ -77,44 +89,35 @@ public class DealsListFragment extends ListFragment {
                     mImageFetcher.setPauseWork(true);
                 } else {
                     mImageFetcher.setPauseWork(false);
-                }
-                /*View child = view.getChildAt(0);
-				int topOffset = child.getTop();
-				if (topOffset < mPreviousTopOffset) {
-					mScrollUpDown.onScrollDown();
-					Log.i(TAG, "down");
-				} else if (topOffset > mPreviousTopOffset) {
-					mScrollUpDown.onScrollUp();
-					Log.i(TAG, "up");
-				}
-				mPreviousTopOffset = topOffset;*/
-                
+                }                
 			}
 			
 			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem,
-					int visibleItemCount, int totalItemCount) {
-				
-				int position = view.getFirstVisiblePosition();
-		        View v = view.getChildAt(0);
-		        int offset = (v == null) ? 0 : v.getTop();
-		        int smoothing = getResources().getDimensionPixelSize(R.dimen.scroll_animation_smoothing);
-		        //Log.i(TAG,  "position: " + position + ", offset: " + offset + ", mPosition: " + mPosition + ", mOffset: " + mOffset);
-		        if (mPosition < position) {
-		        	mScrollUpDown.onScrollDown();
-					//Log.i(TAG, "down");
-		        } else if (mPosition > position){
-		        	mScrollUpDown.onScrollUp();
-					//Log.i(TAG, "up");
-		        } else {
-		        	if (mOffset < offset - smoothing) {
-		        		mScrollUpDown.onScrollUp();
-		        	} else if (mOffset - smoothing > offset) {
-		        		mScrollUpDown.onScrollDown();
-		        	}
-		        }
-		        mPosition = position;
-		        mOffset = offset;
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				if (view.getLastVisiblePosition() == view.getAdapter().getCount() - 1 &&
+						view.getChildAt(view.getChildCount() - 1).getBottom() <= view.getHeight()) {
+					// List has scrolled all the way to the bottom, so show toolbar
+					mScrollUpDown.onScrollUp();
+				} else {
+					int position = view.getFirstVisiblePosition();
+			        View v = view.getChildAt(0);
+			        int offset = (v == null) ? 0 : v.getTop();
+			        int smoothing = getResources().getDimensionPixelSize(R.dimen.scroll_animation_smoothing);
+			        
+			        if (mPosition < position) {
+			        	mScrollUpDown.onScrollDown();
+			        } else if (mPosition > position){
+			        	mScrollUpDown.onScrollUp();
+			        } else {
+			        	if (mOffset < offset - smoothing) {
+			        		mScrollUpDown.onScrollUp();
+			        	} else if (mOffset - smoothing > offset) {
+			        		mScrollUpDown.onScrollDown();
+			        	}
+			        }
+			        mPosition = position;
+			        mOffset = offset;
+				}
 			}
 		});
 	}
@@ -122,15 +125,27 @@ public class DealsListFragment extends ListFragment {
 	 @Override
 	 public void onListItemClick(ListView l, View v, int position, long id) {
 		 // Notify the parent activity of selected item
-	     mCallback.onDealSelected(position);
+	     mCallback.onDealSelected(mAdapter.getItem(position));
 	        
 	     // Set the item as checked to be highlighted when in two-pane layout
 	     getListView().setItemChecked(position, true);
 	}
 	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public void onResume() {
 		super.onResume();
+		Log.d(TAG, "On Fragment Resume");
+		if (Utils.hasHoneycomb()) {
+			ActionBar actionBar = getActivity().getActionBar();
+			if (mQuery != null) {
+				actionBar.setDisplayShowTitleEnabled(true);
+				actionBar.setTitle(mQuery);
+			} else {
+				actionBar.setDisplayShowTitleEnabled(false);
+				actionBar.setTitle("");
+			}
+		}
 		mImageFetcher.setExitTasksEarly(false);
 		mAdapter.notifyDataSetChanged();
 	}

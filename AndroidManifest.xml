@@ -43,6 +43,9 @@
                 android:value="gr.unfold.android.tsibato.MainActivity">
             </meta-data>
         </activity>
+        <provider android:name=".search.DealSuggestionsProvider"
+              android:authorities="gr.unfold.android.tsibato.search.DealSuggestionsProvider">
+		</provider>
     </application>
 
 </manifest>

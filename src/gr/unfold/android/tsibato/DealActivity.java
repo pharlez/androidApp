@@ -11,6 +11,8 @@ import gr.unfold.android.tsibato.util.Utils;
 import gr.unfold.android.tsibato.views.RecyclingImageView;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -25,12 +27,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.SearchView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
+import android.widget.SearchView.OnQueryTextListener;
+import android.widget.SearchView.OnSuggestionListener;
 
 public class DealActivity extends FragmentActivity {
 	private static final String TAG = "DealActivity";
@@ -119,10 +126,7 @@ public class DealActivity extends FragmentActivity {
 	}
 	
 	public void shareDeal(View view) {
-		Intent sendIntent = new Intent(Intent.ACTION_SEND);
-		sendIntent.setType("text/plain");
-		sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Some Subject Line");
-		sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send " + dealUrl);
+		Intent sendIntent = getShareIntent();
 		startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareTitle)));
 	}
 	
@@ -137,8 +141,36 @@ public class DealActivity extends FragmentActivity {
 	            startActivity(parentActivityIntent);
 	            finish();
 	            return true;
+	        case R.id.share:
+	        	if (!Utils.hasIceCreamSandwich()) {
+	        		Intent sendIntent = getShareIntent();
+	        		startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareTitle)));
+	        		return true;
+	        	}
 	    }
 	    return super.onOptionsItemSelected(item);
+	}
+	
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.detail, menu);
+		
+		if (Utils.hasIceCreamSandwich()) {
+			ShareActionProvider shareActionProvider = (ShareActionProvider) menu.findItem(R.id.share).getActionProvider();
+			shareActionProvider.setShareIntent(getShareIntent());
+		}
+		
+		return true;
+	}
+	
+	private Intent getShareIntent() {
+		Intent intent = new Intent();
+		intent.setType("text/plain");
+		intent.putExtra(Intent.EXTRA_SUBJECT, "Some Subject Line");
+		intent.putExtra(Intent.EXTRA_TEXT, "This is my text to send " + dealUrl);
+		return intent;
 	}
 	
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float roundPx) {

@@ -52,35 +52,37 @@ public final class R {
         public static final int diagonal=0x7f020003;
         public static final int discount_dark=0x7f020004;
         public static final int discount_light=0x7f020005;
-        public static final int ic_arrow=0x7f020006;
-        public static final int ic_arrow_white=0x7f020007;
-        public static final int ic_launcher=0x7f020008;
-        public static final int ic_list=0x7f020009;
-        public static final int ic_logo=0x7f02000a;
-        public static final int ic_logo_white=0x7f02000b;
-        public static final int ic_map=0x7f02000c;
-        public static final int ic_menu_search=0x7f02000d;
-        public static final int ic_share=0x7f02000e;
-        public static final int item_btn_state=0x7f02000f;
-        public static final int item_button=0x7f020010;
-        public static final int item_selector_even=0x7f020011;
-        public static final int item_selector_odd=0x7f020012;
-        public static final int item_share=0x7f020013;
-        public static final int list_btn_selected=0x7f020014;
-        public static final int list_btn_state=0x7f020015;
-        public static final int list_button=0x7f020016;
-        public static final int map_btn_selected=0x7f020017;
-        public static final int map_btn_state=0x7f020018;
-        public static final int map_button=0x7f020019;
-        public static final int pattern=0x7f02001a;
-        public static final int pricebar_background=0x7f02001b;
-        public static final int pricebar_pattern=0x7f02001c;
-        public static final int toolbar_background=0x7f02001d;
-        public static final int toolbar_pattern=0x7f02001e;
+        public static final int home_logo=0x7f020006;
+        public static final int ic_arrow=0x7f020007;
+        public static final int ic_arrow_white=0x7f020008;
+        public static final int ic_launcher=0x7f020009;
+        public static final int ic_list=0x7f02000a;
+        public static final int ic_logo=0x7f02000b;
+        public static final int ic_logo_white=0x7f02000c;
+        public static final int ic_map=0x7f02000d;
+        public static final int ic_menu_search=0x7f02000e;
+        public static final int ic_share=0x7f02000f;
+        public static final int item_btn_state=0x7f020010;
+        public static final int item_button=0x7f020011;
+        public static final int item_selector_even=0x7f020012;
+        public static final int item_selector_odd=0x7f020013;
+        public static final int item_share=0x7f020014;
+        public static final int list_btn_selected=0x7f020015;
+        public static final int list_btn_state=0x7f020016;
+        public static final int list_button=0x7f020017;
+        public static final int map_btn_selected=0x7f020018;
+        public static final int map_btn_state=0x7f020019;
+        public static final int map_button=0x7f02001a;
+        public static final int pattern=0x7f02001b;
+        public static final int pricebar_background=0x7f02001c;
+        public static final int pricebar_pattern=0x7f02001d;
+        public static final int toolbar_background=0x7f02001e;
+        public static final int toolbar_pattern=0x7f02001f;
     }
     public static final class id {
         public static final int button_list=0x7f0b0002;
         public static final int button_map=0x7f0b0003;
+        public static final int clear_history=0x7f0b0011;
         public static final int dealActions=0x7f0b000a;
         public static final int dealBtn=0x7f0b000c;
         public static final int dealarrow=0x7f0b000d;
@@ -91,8 +93,9 @@ public final class R {
         public static final int dealtitle=0x7f0b0009;
         public static final int dealvalue=0x7f0b0006;
         public static final int fragment_container=0x7f0b0000;
-        public static final int search=0x7f0b000e;
+        public static final int search=0x7f0b0010;
         public static final int settings=0x7f0b000f;
+        public static final int share=0x7f0b000e;
         public static final int shareBtn=0x7f0b000b;
         public static final int toolbar=0x7f0b0001;
     }
@@ -102,23 +105,28 @@ public final class R {
         public static final int list_deal=0x7f030002;
     }
     public static final class menu {
-        public static final int main=0x7f0a0000;
+        public static final int detail=0x7f0a0000;
+        public static final int main=0x7f0a0001;
     }
     public static final class string {
-        public static final int action_search=0x7f080002;
+        public static final int action_clear_history=0x7f080004;
+        public static final int action_search=0x7f080003;
         public static final int action_settings=0x7f080001;
+        public static final int action_share=0x7f080002;
         public static final int app_name=0x7f080000;
-        public static final int euro_symbol=0x7f080006;
-        public static final int failed_msg=0x7f080004;
-        public static final int from_value=0x7f080007;
-        public static final int loading_msg=0x7f080003;
-        public static final int no_connection=0x7f080005;
-        public static final int percent=0x7f080008;
-        public static final int search_hint=0x7f08000a;
-        public static final int shareTitle=0x7f080009;
+        public static final int clear_history_dialog=0x7f08000d;
+        public static final int euro_symbol=0x7f080008;
+        public static final int failed_msg=0x7f080006;
+        public static final int from_value=0x7f080009;
+        public static final int loading_msg=0x7f080005;
+        public static final int no_connection=0x7f080007;
+        public static final int percent=0x7f08000a;
+        public static final int search_hint=0x7f08000c;
+        public static final int shareTitle=0x7f08000b;
     }
     public static final class style {
         public static final int AppActionBar=0x7f090003;
+        public static final int AppActionBarTitle=0x7f090004;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.

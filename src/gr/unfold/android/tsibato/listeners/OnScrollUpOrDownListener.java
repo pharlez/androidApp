@@ -1,4 +1,4 @@
-package gr.unfold.android.tsibato;
+package gr.unfold.android.tsibato.listeners;
 
 public interface OnScrollUpOrDownListener {
 	

@@ -4,34 +4,36 @@ import java.util.ArrayList;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
+import android.widget.SearchView.OnSuggestionListener;
 import android.widget.Toast;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 
 import gr.unfold.android.tsibato.async.AsyncTaskListener;
 import gr.unfold.android.tsibato.async.IProgressTracker;
 import gr.unfold.android.tsibato.data.Deal;
+import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
+import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
 import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
+import gr.unfold.android.tsibato.search.DealSuggestionsProvider;
 import gr.unfold.android.tsibato.util.Utils;
 
 public class MainActivity extends FragmentActivity
@@ -40,17 +42,16 @@ public class MainActivity extends FragmentActivity
 	private static final String TAG = MainActivity.class.getName();
 	
 	private ProgressDialog progressDialog;
-	private Menu mMenuActionBar;
 	private MenuItem mSearchMenuItem;
 	
 	private ArrayList<Deal> mDeals;
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (BuildConfig.DEBUG) {
             //Utils.enableStrictMode();
         }
+		Log.d(TAG, "On Create");
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.activity_main);
@@ -86,6 +87,9 @@ public class MainActivity extends FragmentActivity
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
         	String query = intent.getStringExtra(SearchManager.QUERY);
         	searchDeals(query);
+        	SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+        			DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
+            suggestions.saveRecentQuery(query, null);
         } else {
         	
         }
@@ -125,7 +129,7 @@ public class MainActivity extends FragmentActivity
 		task.execute(GetDealsTask.createRequest());
 	}
 	
-	private void searchDeals(String query) {
+	private void searchDeals(final String query) {
 		SearchDealsTask task = new SearchDealsTask();
 		
 		task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
@@ -133,7 +137,7 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTaskCompleteSuccess(ArrayList<Deal> result) {
 				mDeals = result;
-				displaySearchDeals(result);
+				displaySearchDeals(query, result);
 			}
 			
 			@Override
@@ -174,11 +178,12 @@ public class MainActivity extends FragmentActivity
         transaction.commit();
 	}
 	
-	private void displaySearchDeals(ArrayList<Deal> results) {
+	private void displaySearchDeals(String query, ArrayList<Deal> results) {
 		// Create an instance of DealsListFragment
         DealsListFragment listFragment = new DealsListFragment();
         
         Bundle bundle = new Bundle();
+        bundle.putString("SEARCH_QUERY", query);
         bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", results);
         
         listFragment.setArguments(bundle);
@@ -190,9 +195,9 @@ public class MainActivity extends FragmentActivity
         transaction.commit();
 	}
 	
-	public void onDealSelected(int position) {
+	public void onDealSelected(Deal deal) {
 		Intent intent = new Intent(this, DealActivity.class);
-		intent.putExtra("DEAL_PARCEL", mDeals.get(position));
+		intent.putExtra("DEAL_PARCEL", deal);
 		startActivity(intent);
 	}
 	
@@ -233,6 +238,7 @@ public class MainActivity extends FragmentActivity
 	@Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "On Resume");
         if (progressDialog == null) {
             setProgressDialog();
         }
@@ -247,31 +253,34 @@ public class MainActivity extends FragmentActivity
 		
 		if (Utils.hasHoneycomb()) {
 			SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-			//SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
 			SearchView searchView = (SearchView) mSearchMenuItem.getActionView();
 			searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 			searchView.setOnQueryTextListener(new OnQueryTextListener() {
-
-		        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 				@Override
 		        public boolean onQueryTextSubmit(String query) {
 		            //Do nothing, results for the string supplied are already shown.
 		            //Just collapse search widget
-		        	if (Utils.hasIceCreamSandwich()) {
-		        		mSearchMenuItem.collapseActionView();
-		        	}
+		        	closeSearch();
 		            return false;
 		        }
-
 		        @Override
 		        public boolean onQueryTextChange(String newText) {
-		            //do other stuff
 		             return false;
 		        }
 		    });
+			searchView.setOnSuggestionListener(new OnSuggestionListener() {
+				@Override
+				public boolean onSuggestionClick(int position) {
+					closeSearch();
+					return false;
+				}
+				@Override
+				public boolean onSuggestionSelect(int position) {
+					return false;
+				}
+			});
 		}
 		
-		//mMenuActionBar = menu;
 		return true;
 	}
 	
@@ -283,6 +292,24 @@ public class MainActivity extends FragmentActivity
 	        		onSearchRequested();
 	        	}
 	            return true;
+	        case R.id.clear_history:
+	        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	            builder.setMessage(getString(R.string.clear_history_dialog))
+	                   .setCancelable(false)
+	                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+	                       public void onClick(DialogInterface dialog, int id) {
+	                    	   clearSearchSuggestions();
+	                    	   dialog.dismiss();
+	                       }
+	                   })
+	                   .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	                       public void onClick(DialogInterface dialog, int id) {
+	                            dialog.cancel();
+	                       }
+	                   });
+	            AlertDialog alert = builder.create();
+	            alert.show();
+	        	return true;
 	        default:
 	            return false;
 	    }
@@ -311,6 +338,21 @@ public class MainActivity extends FragmentActivity
 	
 	private void showToastMessage(int messageId) {
 		Toast.makeText(this, messageId, Toast.LENGTH_LONG).show();
+	}
+	
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	private void closeSearch() {
+		if (Utils.hasIceCreamSandwich()) {
+    		mSearchMenuItem.collapseActionView();
+    	} else {
+    		mSearchMenuItem.getActionView().clearFocus();
+    	}
+	}
+	
+	private void clearSearchSuggestions() {
+		SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+				DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
+		suggestions.clearHistory();
 	}
 
 }
