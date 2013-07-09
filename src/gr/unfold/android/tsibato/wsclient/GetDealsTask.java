@@ -1,12 +1,14 @@
 package gr.unfold.android.tsibato.wsclient;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.SoapFault;
+import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
@@ -22,14 +24,53 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
 	
 	private static final String WSDL_URL = "http://www.tsibato.gr/ws/iphone.asmx?WSDL";
     private static final String WS_NAMESPACE = "http://tempuri.org/";
-    private static final String WS_METHOD_NAME = "GetDeals";
+    private static final String WS_METHOD_NAME = "GetDealsAdvanced";
     
     public GetDealsTask() {
     
     }
     
     public static SoapObject createRequest() {
-    	return new SoapObject(WS_NAMESPACE, WS_METHOD_NAME);
+    	SoapObject request = new SoapObject(WS_NAMESPACE, WS_METHOD_NAME);
+    	
+    	PropertyInfo locationProperty = new PropertyInfo();
+    	locationProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
+    	locationProperty.setName("locationId");
+    	locationProperty.setValue(1);
+        
+        request.addProperty(locationProperty);
+
+        PropertyInfo pageProperty = new PropertyInfo();
+        pageProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
+        pageProperty.setName("page");
+        pageProperty.setValue(1);
+        
+        request.addProperty(pageProperty);
+        
+        PropertyInfo rankProperty = new PropertyInfo();
+        rankProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
+        rankProperty.setName("rank");
+        rankProperty.setValue(1);
+        
+        request.addProperty(rankProperty);
+        
+        List<Integer> providers =  new ArrayList<Integer>();
+
+        SoapObject soapProviders = new SoapObject(WS_NAMESPACE, "providerIds");
+        for (Integer i : providers){
+        	soapProviders.addProperty("int", i);
+        }
+        request.addSoapObject(soapProviders);
+        
+        List<Integer> categories =  new ArrayList<Integer>();
+
+        SoapObject soapCategories = new SoapObject(WS_NAMESPACE, "categoryIds");
+        for (Integer i : categories){
+        	soapCategories.addProperty("int", i);
+        }
+        request.addSoapObject(soapCategories);
+        
+        return request;
     }
     
     @Override
@@ -63,7 +104,7 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     
     private ArrayList<Deal> parseSOAPResponse(SoapObject response) {
     	ArrayList<Deal> result = new ArrayList<Deal>();
-    	SoapObject dealsResult = (SoapObject) response.getProperty("GetDealsResult");
+    	SoapObject dealsResult = (SoapObject) response.getProperty("GetDealsAdvancedResult");
     	if (dealsResult != null) {
     		for (int i = 0; i < dealsResult.getPropertyCount(); i++) {
     			SoapObject dealItem = (SoapObject) dealsResult.getProperty(i);

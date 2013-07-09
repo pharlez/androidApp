@@ -167,9 +167,10 @@ public class DealActivity extends FragmentActivity {
 	
 	private Intent getShareIntent() {
 		Intent intent = new Intent();
+		intent.setAction(Intent.ACTION_SEND);
 		intent.setType("text/plain");
 		intent.putExtra(Intent.EXTRA_SUBJECT, "Some Subject Line");
-		intent.putExtra(Intent.EXTRA_TEXT, "This is my text to send " + dealUrl);
+		intent.putExtra(Intent.EXTRA_TEXT, "This is my text to send/n" + dealUrl);
 		return intent;
 	}
 	

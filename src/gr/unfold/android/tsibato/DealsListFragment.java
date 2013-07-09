@@ -9,15 +9,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
 import gr.unfold.android.tsibato.images.ImageFetcher;
 import gr.unfold.android.tsibato.images.ImageCache.ImageCacheParams;
 import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
+import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
 import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
 import gr.unfold.android.tsibato.util.Utils;
 import gr.unfold.android.tsibato.adapter.DealsAdapter;
@@ -40,6 +39,7 @@ public class DealsListFragment extends ListFragment {
 	
 	protected OnDealSelectedListener mCallback;
 	protected OnScrollUpOrDownListener mScrollUpDown;
+	protected OnDealsChangedListener mUpdater;
 	
 	public DealsListFragment() { }
 	
@@ -135,7 +135,10 @@ public class DealsListFragment extends ListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.d(TAG, "On Fragment Resume");
+		
+		mUpdater.onDealsDataChanged((ArrayList<Deal>) mAdapter.getDeals());
+		mUpdater.onListMapVisibilityChanged(true);
+		
 		if (Utils.hasHoneycomb()) {
 			ActionBar actionBar = getActivity().getActionBar();
 			if (mQuery != null) {
@@ -162,13 +165,6 @@ public class DealsListFragment extends ListFragment {
 	public void onDestroy() {
 		super.onDestroy();
 		mImageFetcher.closeCache();
-	}	
-	
-	@Override
-	public void onStart() {
-		super.onStart();
-		
-		// logic for onStart here
 	}
 	
 	@Override
@@ -180,9 +176,10 @@ public class DealsListFragment extends ListFragment {
         try {
             mCallback = (OnDealSelectedListener) activity;
             mScrollUpDown = (OnScrollUpOrDownListener) activity;
+            mUpdater = (OnDealsChangedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnDealSelectedListener and OnScrollUpOrDownListener");
+                    + " must implement OnDealSelectedListener, OnScrollUpOrDownListener and OnDealsDataChangedListener");
         }
 	}
 	

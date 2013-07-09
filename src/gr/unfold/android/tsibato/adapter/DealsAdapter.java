@@ -20,21 +20,23 @@ import gr.unfold.android.tsibato.views.RecyclingImageView;
 
 public class DealsAdapter extends ArrayAdapter<Deal> {
 	
-	private final int[] bgColors = new int[] { R.color.list_white, R.color.list_gray };
-	
 	private LayoutInflater inflater;
 	private Context mContext;
 	private ImageFetcher mImageFetcher;
 	
-//	private static List<Deal> mDeals;
+	private List<Deal> mDeals;
 	
 	public DealsAdapter(Context context, List<Deal> objects, ImageFetcher imageFetcher) {
 		super(context, android.R.layout.simple_list_item_1, objects);
 		
 		mContext = context;
 		mImageFetcher = imageFetcher;
-//		mDeals = objects;
+		mDeals = objects;
 		inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+	
+	public List<Deal> getDeals() {
+		return mDeals;
 	}
 	
 	@Override
@@ -55,14 +57,10 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		
-//		int colorPosition = position % bgColors.length;
-//        convertView.setBackgroundResource(bgColors[colorPosition]);
 		if (position % 2 == 0) {
 			convertView.setBackgroundResource(R.drawable.item_selector_odd);
-			//convertView.setBackgroundColor(mContext.getResources().getColor(R.color.item_selector_odd));
 		} else {
 			convertView.setBackgroundResource(R.drawable.item_selector_even);
-			//convertView.setBackgroundColor(mContext.getResources().getColor(R.color.item_selector_even));
 		}
         
 		
@@ -71,15 +69,9 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 			imageView = new RecyclingImageView(mContext);
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		}
-		
-//		TextView price = (TextView)convertView.findViewById(R.id.dealprice);
-//		TextView value = (TextView)convertView.findViewById(R.id.dealvalue);
-//		TextView discount = (TextView)convertView.findViewById(R.id.dealdiscount);
-//		TextView title = (TextView)convertView.findViewById(R.id.dealtitle);
+
 		
 		Deal deal = getItem(position);
-//		Deal deal = mDeals.get(position);
-//		String[] data = deal.data;
 		
 		mImageFetcher.loadImage(deal.getThumbnail(), imageView);
 		
@@ -87,24 +79,13 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 		nf_el.setMinimumFractionDigits(2);
 		nf_el.setMaximumFractionDigits(2);
 		
-		//BigDecimal p = deal.price.setScale(2, RoundingMode.HALF_UP);
 		viewHolder.priceView.setText(nf_el.format(deal.price) + mContext.getString(R.string.euro_symbol));
-//		viewHolder.priceView.setText("50,00");
 		
-		//BigDecimal v = deal.value.setScale(2, RoundingMode.HALF_UP);
 		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + nf_el.format(deal.value) + mContext.getString(R.string.euro_symbol));
-//		viewHolder.valueView.setText(mContext.getString(R.string.from_value) + " " + "500,00");
 		
 		viewHolder.discountView.setText("-" + deal.discount + mContext.getString(R.string.percent));
-//		viewHolder.discountView.setText("-" + "90" + mContext.getString(R.string.percent));
 		
 		viewHolder.titleView.setText(deal.getSmallTitle(300));
-//		viewHolder.titleView.setText("Fucking hell is this working smoothly now");		
-		
-		//TextView lineView = (TextView)convertView.findViewById(android.R.id.text1);
-		
-		//lineView.setText(String.format("[ %d : %d ] - %s, %s, %s: [%f x %f = %f], (%f, %f, %f)", deal.getId(), deal.getPurchases(), deal.getTitle(), deal.getThumbnail(), deal.getProviderLogo(),
-		//		deal.getValue(), deal.getDiscount(), deal.getPrice(), deal.getLon(), deal.getLat(), deal.getMapZoom()));
 		
 		return convertView;
 	}

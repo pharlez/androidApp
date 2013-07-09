@@ -28,13 +28,15 @@
    	        android:id="@+id/button_list"
    	        android:layout_width="55dp"
    	        android:layout_height="35dp"
-   	        android:background="@drawable/list_btn_state" />
+   	        android:background="@drawable/list_btn_state"
+   	        android:onClick="onListSelected" />
    	    
    	    <Button
    	        android:id="@+id/button_map"
    	        android:layout_width="55dp"
    	        android:layout_height="35dp"
-   	        android:background="@drawable/map_btn_state" />
+   	        android:background="@drawable/map_btn_state"
+   	        android:onClick="onMapSelected" />
    	    
     </LinearLayout>
 

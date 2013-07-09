@@ -2,6 +2,10 @@ package gr.unfold.android.tsibato;
 
 import java.util.ArrayList;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.SupportMapFragment;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
@@ -30,6 +34,7 @@ import gr.unfold.android.tsibato.async.AsyncTaskListener;
 import gr.unfold.android.tsibato.async.IProgressTracker;
 import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
+import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
 import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
 import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
@@ -37,7 +42,7 @@ import gr.unfold.android.tsibato.search.DealSuggestionsProvider;
 import gr.unfold.android.tsibato.util.Utils;
 
 public class MainActivity extends FragmentActivity
-		implements OnDealSelectedListener, OnScrollUpOrDownListener {
+		implements OnDealSelectedListener, OnScrollUpOrDownListener, OnDealsChangedListener {
 	
 	private static final String TAG = MainActivity.class.getName();
 	
@@ -72,8 +77,7 @@ public class MainActivity extends FragmentActivity
             }
             
             getDeals();
-
-            findViewById(R.id.button_list).setSelected(true);
+            
         }
 	}
 	
@@ -195,10 +199,37 @@ public class MainActivity extends FragmentActivity
         transaction.commit();
 	}
 	
+	public void onListSelected(View view) {
+		
+	}
+	
+	public void onMapSelected(View view) {		
+		DealsMapFragment mapFragment = DealsMapFragment.newInstance(mDeals);
+		
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		transaction.replace(R.id.fragment_container, mapFragment);
+		transaction.addToBackStack(null);
+		transaction.commit();
+	}
+	
 	public void onDealSelected(Deal deal) {
 		Intent intent = new Intent(this, DealActivity.class);
 		intent.putExtra("DEAL_PARCEL", deal);
 		startActivity(intent);
+	}
+	
+	public void onDealsDataChanged(ArrayList<Deal> deals) {
+		mDeals = deals;
+	}
+	
+	public void onListMapVisibilityChanged(boolean isListVisible) {
+		if (isListVisible) {
+			findViewById(R.id.button_list).setSelected(true);
+			findViewById(R.id.button_map).setSelected(false);
+		} else {
+			findViewById(R.id.button_map).setSelected(true);
+			findViewById(R.id.button_list).setSelected(false);
+		}
 	}
 	
 	public void onScrollUp() {
@@ -321,6 +352,8 @@ public class MainActivity extends FragmentActivity
 		if (Utils.hasHoneycomb()) {
 			if (Utils.hasIceCreamSandwich()) {
 				mSearchMenuItem.expandActionView();
+			} else {
+				mSearchMenuItem.getActionView().requestFocus();
 			}
 			return false;  // don't go ahead and show the search box
 		} else {
