@@ -284,7 +284,7 @@ containing a value of this type.
         /**   Requested by string saying which app requested the notification. [CHAR LIMIT=42] 
          */
         public static final int auth_client_requested_by_msg=0x7f080011;
-        public static final int clear_history_dialog=0x7f080022;
+        public static final int clear_history_dialog=0x7f080023;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
         can enable it [CHAR LIMIT=40] 
@@ -340,9 +340,10 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f08000e;
-        public static final int euro_symbol=0x7f08001d;
+        public static final int euro_symbol=0x7f08001e;
         public static final int failed_msg=0x7f08001b;
-        public static final int from_value=0x7f08001e;
+        public static final int from_value=0x7f08001f;
+        public static final int list_empty_text=0x7f08001d;
         public static final int loading_msg=0x7f08001a;
         /**  Location client code resources (prefix with location_client) 
 
@@ -356,9 +357,9 @@ containing a value of this type.
         public static final int location_client_ulr_inactive_age_unknown=0x7f080013;
         public static final int location_client_ulr_inactive_unknown_restriction=0x7f080014;
         public static final int no_connection=0x7f08001c;
-        public static final int percent=0x7f08001f;
-        public static final int search_hint=0x7f080021;
-        public static final int shareTitle=0x7f080020;
+        public static final int percent=0x7f080020;
+        public static final int search_hint=0x7f080022;
+        public static final int shareTitle=0x7f080021;
     }
     public static final class style {
         public static final int AppActionBar=0x7f0a0003;

@@ -1,6 +1,7 @@
 package gr.unfold.android.tsibato;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -29,6 +30,7 @@ public class DealsListFragment extends ListFragment {
 	private int mImageHeight;
 	private int mImageWidth;
 	
+	private ArrayList<Deal> mDeals;
 	private String mQuery;
 	
 	private ImageFetcher mImageFetcher;
@@ -41,6 +43,16 @@ public class DealsListFragment extends ListFragment {
 	protected OnScrollUpOrDownListener mScrollUpDown;
 	protected OnDealsChangedListener mUpdater;
 	
+	public static DealsListFragment newInstance(ArrayList<Deal> deals) {
+		DealsListFragment listFragment = new DealsListFragment();
+
+		Bundle bundle = new Bundle();
+		bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", deals);      
+		listFragment.setArguments(bundle);
+
+        return listFragment;
+    }
+	
 	public DealsListFragment() { }
 	
 	@Override
@@ -50,11 +62,9 @@ public class DealsListFragment extends ListFragment {
 		mImageHeight = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_height);
 		mImageWidth = getResources().getDimensionPixelSize(R.dimen.image_thumbnail_width);
 		
-		ArrayList<Deal> deals = new ArrayList<Deal>();
-		
 		Bundle bundle = this.getArguments();
 		if (bundle != null) {
-			deals = bundle.getParcelableArrayList("DEALS_PARCEL_ARRAY");
+			mDeals = bundle.getParcelableArrayList("DEALS_PARCEL_ARRAY");
 			String query = bundle.getString("SEARCH_QUERY");
 			if (query != null) {
 				mQuery = query;
@@ -68,7 +78,7 @@ public class DealsListFragment extends ListFragment {
         mImageFetcher.setLoadingImage(R.drawable.ic_launcher);
         mImageFetcher.addImageCache(getActivity().getSupportFragmentManager(), cacheParams);
 		
-        mAdapter = new DealsAdapter(getActivity(), deals, mImageFetcher);
+        mAdapter = new DealsAdapter(getActivity(), mDeals, mImageFetcher);
 		
 		//setListAdapter(mAdapter);
 	}
@@ -79,6 +89,8 @@ public class DealsListFragment extends ListFragment {
 	    super.onActivityCreated(savedInstanceState);
 	    
 	    setListAdapter(mAdapter);
+	    
+	    setEmptyText(getString(R.string.list_empty_text));
 	    
 	    getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
 			
@@ -94,6 +106,9 @@ public class DealsListFragment extends ListFragment {
 			
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				if (view.getChildCount() == 0) {
+					return;
+				}
 				if (view.getLastVisiblePosition() == view.getAdapter().getCount() - 1 &&
 						view.getChildAt(view.getChildCount() - 1).getBottom() <= view.getHeight()) {
 					// List has scrolled all the way to the bottom, so show toolbar
@@ -131,24 +146,12 @@ public class DealsListFragment extends ListFragment {
 	     getListView().setItemChecked(position, true);
 	}
 	
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public void onResume() {
 		super.onResume();
+
+		mUpdater.onDealsDataChanged(mDeals);
 		
-		mUpdater.onDealsDataChanged((ArrayList<Deal>) mAdapter.getDeals());
-		mUpdater.onListMapVisibilityChanged(true);
-		
-		if (Utils.hasHoneycomb()) {
-			ActionBar actionBar = getActivity().getActionBar();
-			if (mQuery != null) {
-				actionBar.setDisplayShowTitleEnabled(true);
-				actionBar.setTitle(mQuery);
-			} else {
-				actionBar.setDisplayShowTitleEnabled(false);
-				actionBar.setTitle("");
-			}
-		}
 		mImageFetcher.setExitTasksEarly(false);
 		mAdapter.notifyDataSetChanged();
 	}

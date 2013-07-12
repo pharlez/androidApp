@@ -2,18 +2,18 @@ package gr.unfold.android.tsibato;
 
 import java.util.ArrayList;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
-import com.google.android.gms.maps.SupportMapFragment;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
@@ -36,6 +36,7 @@ import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
 import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
 import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
+import gr.unfold.android.tsibato.views.ViewPagerNonSwipeable;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
 import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
 import gr.unfold.android.tsibato.search.DealSuggestionsProvider;
@@ -45,57 +46,81 @@ public class MainActivity extends FragmentActivity
 		implements OnDealSelectedListener, OnScrollUpOrDownListener, OnDealsChangedListener {
 	
 	private static final String TAG = MainActivity.class.getName();
+	private static final int NUM_ITEMS = 2;
 	
 	private ProgressDialog progressDialog;
 	private MenuItem mSearchMenuItem;
 	
+	private DealsListFragment mListFragment;
+	private DealsMapFragment mMapFragment;
+	
+	private ListMapPagerAdapter mPagerAdapter;
+    private ViewPagerNonSwipeable mPager;
+	
 	private ArrayList<Deal> mDeals;
+	private String mQuery;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (BuildConfig.DEBUG) {
-            //Utils.enableStrictMode();
-        }
-		Log.d(TAG, "On Create");
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.activity_main);
 		
 		setProgressDialog();
 		
-		//onSearchRequested();
-		
 		// Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.fragment_container) != null) {
-
+        	
+        	mPagerAdapter = new ListMapPagerAdapter(getSupportFragmentManager());
+    		mPager = (ViewPagerNonSwipeable) findViewById(R.id.fragment_container);
+            
+    		Button listButton = (Button)findViewById(R.id.button_list);
+    		listButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                	selectListOrMap(0);
+                    mPager.setCurrentItem(0);
+                }
+            });
+            Button mapButton = (Button)findViewById(R.id.button_map);
+            mapButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                	selectListOrMap(NUM_ITEMS - 1);
+                    mPager.setCurrentItem(NUM_ITEMS - 1);
+                }
+            });
+        	
             // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
+            // we should load the data from bundle
             if (savedInstanceState != null) {
+            	mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
+            	mQuery = savedInstanceState.getString("SEARCH_QUERY");
+            	
+            	onSearchQueryChanged(mQuery);
+            	mPager.setAdapter(mPagerAdapter);
+            	
+            	int activeViewPage = savedInstanceState.getInt("ACTIVE_VIEW_PAGE");
+            	mPager.setCurrentItem(activeViewPage);
+            	selectListOrMap(activeViewPage);
+            	
             	return;
             }
             
-            getDeals();
+            Intent intent = getIntent();
             
-        }
-	}
-	
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		handleIntent(intent);
-	}
-	
-	private void handleIntent(Intent intent) {
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-        	String query = intent.getStringExtra(SearchManager.QUERY);
-        	searchDeals(query);
-        	SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-        			DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
-            suggestions.saveRecentQuery(query, null);
-        } else {
-        	
+            if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            	String query = intent.getStringExtra(SearchManager.QUERY);
+            	int activeView = intent.getIntExtra("ACTIVE_VIEW_PAGE", 0);
+            	
+            	searchDeals(query, activeView);
+            	
+            	SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+            			DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
+                suggestions.saveRecentQuery(query, null);
+                
+            } else {
+            	getDeals();
+            }
         }
 	}
 	
@@ -133,7 +158,7 @@ public class MainActivity extends FragmentActivity
 		task.execute(GetDealsTask.createRequest());
 	}
 	
-	private void searchDeals(final String query) {
+	private void searchDeals(final String query, final int activeView) {
 		SearchDealsTask task = new SearchDealsTask();
 		
 		task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
@@ -141,7 +166,9 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTaskCompleteSuccess(ArrayList<Deal> result) {
 				mDeals = result;
-				displaySearchDeals(query, result);
+				mQuery = query;
+				displayDeals(result, activeView);
+				onSearchQueryChanged(query);
 			}
 			
 			@Override
@@ -168,48 +195,14 @@ public class MainActivity extends FragmentActivity
 	}
 	
 	private void displayDeals(ArrayList<Deal> results) {
-		// Create an instance of DealsListFragment
-        DealsListFragment listFragment = new DealsListFragment();
-        
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", results);
-        
-        listFragment.setArguments(bundle);
-        
-        // Add the fragment to the 'fragment_container' FrameLayout
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.fragment_container, listFragment);
-        transaction.commit();
+		mPager.setAdapter(mPagerAdapter);
+		selectListOrMap(0);
 	}
 	
-	private void displaySearchDeals(String query, ArrayList<Deal> results) {
-		// Create an instance of DealsListFragment
-        DealsListFragment listFragment = new DealsListFragment();
-        
-        Bundle bundle = new Bundle();
-        bundle.putString("SEARCH_QUERY", query);
-        bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", results);
-        
-        listFragment.setArguments(bundle);
-        
-        // Add the fragment to the 'fragment_container' FrameLayout
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, listFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-	}
-	
-	public void onListSelected(View view) {
-		
-	}
-	
-	public void onMapSelected(View view) {		
-		DealsMapFragment mapFragment = DealsMapFragment.newInstance(mDeals);
-		
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-		transaction.replace(R.id.fragment_container, mapFragment);
-		transaction.addToBackStack(null);
-		transaction.commit();
+	private void displayDeals(ArrayList<Deal> results, int activeViewPage) {
+		mPager.setAdapter(mPagerAdapter);
+		mPager.setCurrentItem(activeViewPage);
+		selectListOrMap(activeViewPage);
 	}
 	
 	public void onDealSelected(Deal deal) {
@@ -222,13 +215,42 @@ public class MainActivity extends FragmentActivity
 		mDeals = deals;
 	}
 	
+	public void selectListOrMap(int currentPagerItem) {
+		switch (currentPagerItem) {
+			case 0:
+				findViewById(R.id.button_list).setSelected(true);
+				findViewById(R.id.button_map).setSelected(false);
+				return;
+			case 1:
+				findViewById(R.id.button_map).setSelected(true);
+				findViewById(R.id.button_list).setSelected(false);
+				return;
+		}
+	}
+	
 	public void onListMapVisibilityChanged(boolean isListVisible) {
 		if (isListVisible) {
 			findViewById(R.id.button_list).setSelected(true);
 			findViewById(R.id.button_map).setSelected(false);
+			//this.isListVisible = true;
 		} else {
 			findViewById(R.id.button_map).setSelected(true);
 			findViewById(R.id.button_list).setSelected(false);
+			//this.isListVisible = false;
+		}
+	}
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public void onSearchQueryChanged(String query) {
+		if (Utils.hasHoneycomb()) {
+			ActionBar actionBar = this.getActionBar();
+			if (query != null) {
+				actionBar.setDisplayShowTitleEnabled(true);
+				actionBar.setTitle(query);
+			} else {
+				actionBar.setDisplayShowTitleEnabled(false);
+				actionBar.setTitle("");
+			}
 		}
 	}
 	
@@ -238,8 +260,6 @@ public class MainActivity extends FragmentActivity
 	
 	public void onScrollDown() {
 		LinearLayout toolbar = (LinearLayout) findViewById(R.id.toolbar);
-		/*Animation slideoutAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_out);
-		toolbar.setAnimation(slideoutAnimation);*/
 		toolbar.setVisibility(View.GONE);
 	}
 	
@@ -249,27 +269,23 @@ public class MainActivity extends FragmentActivity
 	  // This bundle will be passed to onCreate if the process is
 	  // killed and restarted.
 	  savedInstanceState.putParcelableArrayList("DEALS_PARCEL_ARRAY", mDeals);
-	  
+	  savedInstanceState.putString("SEARCH_QUERY", mQuery);
+	  savedInstanceState.putInt("ACTIVE_VIEW_PAGE", mPager.getCurrentItem());
 	  super.onSaveInstanceState(savedInstanceState);
 	}
 	
 	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-	  super.onRestoreInstanceState(savedInstanceState);
-	  // Restore UI state from the savedInstanceState.
-	  // This bundle has also been passed to onCreate.
-	  mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
-	}
-	
-	@Override
-	protected void onPause() {
-		super.onPause();
+	public void startActivity(Intent intent) {      
+	    // check if search intent
+	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+	        intent.putExtra("ACTIVE_VIEW_PAGE", mPager.getCurrentItem());
+	    }
+	    super.startActivity(intent);
 	}
 	
 	@Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "On Resume");
         if (progressDialog == null) {
             setProgressDialog();
         }
@@ -387,5 +403,32 @@ public class MainActivity extends FragmentActivity
 				DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
 		suggestions.clearHistory();
 	}
+	
+	public class ListMapPagerAdapter extends FragmentPagerAdapter {
+        public ListMapPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public int getCount() {
+            return NUM_ITEMS;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+        	switch (position) {
+	        	case 0:
+	        		if (mListFragment == null) {
+	        			mListFragment = DealsListFragment.newInstance(mDeals);
+	        		}
+	        		return mListFragment;
+	        	default:
+	        		if (mMapFragment == null) {
+	        			mMapFragment = DealsMapFragment.newInstance(mDeals);
+	        		}
+	        		return mMapFragment;
+        	}
+        }
+    }
 
 }

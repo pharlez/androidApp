@@ -9,8 +9,8 @@
     android:animateLayoutChanges="true"
     tools:context=".MainActivity" >
     
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <gr.unfold.android.tsibato.views.ViewPagerNonSwipeable
+		android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     
@@ -28,15 +28,13 @@
    	        android:id="@+id/button_list"
    	        android:layout_width="55dp"
    	        android:layout_height="35dp"
-   	        android:background="@drawable/list_btn_state"
-   	        android:onClick="onListSelected" />
+   	        android:background="@drawable/list_btn_state" />
    	    
    	    <Button
    	        android:id="@+id/button_map"
    	        android:layout_width="55dp"
    	        android:layout_height="35dp"
-   	        android:background="@drawable/map_btn_state"
-   	        android:onClick="onMapSelected" />
+   	        android:background="@drawable/map_btn_state" />
    	    
     </LinearLayout>
 

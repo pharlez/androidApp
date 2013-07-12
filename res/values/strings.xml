@@ -7,8 +7,9 @@
     <string name="action_search">Search</string>
     <string name="action_clear_history">Clear History</string>
     <string name="loading_msg">Fetching deals&#8230;</string>
-    <string name="failed_msg">Oops, an error occurred. Check that you are connected to the Internet!</string>
+    <string name="failed_msg">An error occurred. Check that you are connected to the Internet!</string>
     <string name="no_connection">No connection found</string>
+    <string name="list_empty_text">No results found</string>
     <string name="euro_symbol">&#8364;</string>
     <string name="from_value">από</string>
     <string name="percent">&#37;</string>
