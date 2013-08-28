@@ -43,7 +43,7 @@ public class DealActivity extends FragmentActivity {
 	private static final String TAG = "DealActivity";
     private static final String IMAGE_CACHE_DIR = "images";
     
-    private String dealUrl;
+    private Deal mDeal;
 	
 	private int mImageHeight;
 	private int mImageWidth;
@@ -67,7 +67,7 @@ public class DealActivity extends FragmentActivity {
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
         
         mImageFetcher = new ImageFetcher(this, mImageWidth, mImageHeight);
-        mImageFetcher.setLoadingImage(R.drawable.ic_launcher);
+        mImageFetcher.setLoadingImage(R.drawable.image_loading);
         mImageFetcher.addImageCache(this.getSupportFragmentManager(), cacheParams);
 		
 		setContentView(R.layout.item_deal);
@@ -102,7 +102,7 @@ public class DealActivity extends FragmentActivity {
 		shaveOffCorners((Button) findViewById(R.id.dealBtn));
 		shaveOffCorners((Button) findViewById(R.id.shareBtn));
 		
-		dealUrl = deal.getLink();
+		mDeal = deal;
 		
 		//StateListDrawable stateList = (StateListDrawable) btn.getBackground();
 //		LayerDrawable layer = (LayerDrawable) btn.getBackground();
@@ -119,7 +119,7 @@ public class DealActivity extends FragmentActivity {
 	}
 	
 	public void goToWebPage(View view) {
-		String url = dealUrl;
+		String url = mDeal.getLink();
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(url));
 		startActivity(intent);
@@ -135,10 +135,10 @@ public class DealActivity extends FragmentActivity {
 	    switch (item.getItemId()) {
 	        case android.R.id.home:
 	            // This is called when the Home (Up) button is pressed in the Action Bar.
-	            Intent parentActivityIntent = new Intent(this, MainActivity.class);
+	            //Intent parentActivityIntent = new Intent(this, MainActivity.class);
 	            //parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	            startActivity(parentActivityIntent);
+	            //parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	            //startActivity(parentActivityIntent);
 	            finish();
 	            return true;
 	        case R.id.share:
@@ -169,8 +169,8 @@ public class DealActivity extends FragmentActivity {
 		Intent intent = new Intent();
 		intent.setAction(Intent.ACTION_SEND);
 		intent.setType("text/plain");
-		intent.putExtra(Intent.EXTRA_SUBJECT, "Some Subject Line");
-		intent.putExtra(Intent.EXTRA_TEXT, "This is my text to send/n" + dealUrl);
+		intent.putExtra(Intent.EXTRA_SUBJECT, mDeal.getSmallTitle(50));
+		intent.putExtra(Intent.EXTRA_TEXT, mDeal.getSmallTitle(300) + " - " + getString(R.string.shareVia) + "\n\n" + mDeal.getLink());
 		return intent;
 	}
 	

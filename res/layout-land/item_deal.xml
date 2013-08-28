@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+    
+    <RelativeLayout
+        android:id="@+id/dealpricebar"
+        android:layout_width="fill_parent"
+        android:layout_height="54dp"
+        android:background="@drawable/pricebar_background"
+        android:paddingBottom="7dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="10dp"
+        android:paddingTop="7dp" >
+        
+        <TextView
+            android:id="@+id/dealprice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:focusable="false"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
+            android:shadowColor="#000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="1"
+            android:singleLine="true"
+            android:textColor="#ffffff"
+            android:textIsSelectable="false"
+            android:textSize="22dp"
+            android:textStyle="bold" />
+
+	    <TextView
+	        android:id="@+id/dealvalue"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true"
+	        android:layout_below="@id/dealprice"
+	        android:focusable="false"
+	        android:includeFontPadding="false"
+	        android:shadowColor="#000000"
+	        android:shadowDx="1"
+	        android:shadowDy="1"
+	        android:shadowRadius="1"
+	        android:singleLine="true"
+	        android:textColor="#ffffff"
+	        android:textIsSelectable="false"
+	        android:textSize="12dp"
+	        tools:ignore="SmallSp" />
+	
+	    <TextView
+	        android:id="@+id/dealdiscount"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+	        android:layout_alignParentRight="true"
+	        android:layout_centerVertical="true"
+	        android:layout_marginRight="0dp"
+	        android:background="@drawable/discount_dark"
+	        android:focusable="false"
+	        android:gravity="center"
+	        android:includeFontPadding="false"
+	        android:padding="0dp"
+	        android:shadowColor="#000000"
+	        android:shadowDx="1"
+	        android:shadowDy="1"
+	        android:shadowRadius="1"
+	        android:singleLine="true"
+	        android:textColor="#ffffff"
+	        android:textIsSelectable="false"
+	        android:textSize="12.5dp"
+	        android:textStyle="bold" />
+        
+	</RelativeLayout>
+    
+    <ImageView
+        android:id="@+id/dealimage"
+        android:layout_width="@dimen/image_large_width"
+        android:layout_height="@dimen/image_large_height"
+        android:layout_marginTop="18dp"
+        android:layout_marginLeft="18dp"
+        android:layout_below="@id/dealpricebar" />    
+    
+    <RelativeLayout
+        android:id="@+id/dealActions"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:padding="15dp"
+        android:orientation="horizontal">
+	    
+        <Button
+            android:id="@+id/shareBtn"
+            android:layout_alignParentLeft="true"
+            android:layout_width="50dp"
+            android:layout_height="45dp"
+            android:background="@drawable/item_share"
+            android:onClick="shareDeal" />
+        
+        <Button
+	        android:id="@+id/dealBtn"
+	        android:layout_alignParentRight="true"
+	        android:layout_width="148dp"
+	        android:layout_height="45dp"
+	        android:background="@drawable/item_button"
+	        android:onClick="goToWebPage" />
+        
+    </RelativeLayout>
+    
+	<TextView
+        android:id="@+id/dealtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/dealpricebar"
+        android:layout_above="@id/dealActions"
+        android:layout_toRightOf="@id/dealimage"
+        android:layout_marginTop="18dp"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="25dp"
+        android:textColor="#555555"
+        android:textIsSelectable="true"
+        android:textSize="11.5sp"
+        tools:ignore="SmallSp"/>    
+    
+</RelativeLayout>

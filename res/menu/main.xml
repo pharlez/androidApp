@@ -11,11 +11,17 @@
     <item
         android:id="@+id/settings"
         android:showAsAction="never"
-        android:title="@string/action_settings" />
+        android:title="@string/action_settings"
+        android:icon="@drawable/ic_menu_settings" />
     
-    <item
+    <!-- <item
         android:id="@+id/clear_history"
         android:showAsAction="never"
-        android:title="@string/action_clear_history" />
+        android:title="@string/action_clear_history" /> -->
+    
+    <!-- <item
+        android:id="@+id/count_deals"
+        android:showAsAction="never"
+        android:title="Count Items" /> -->
 
 </menu>

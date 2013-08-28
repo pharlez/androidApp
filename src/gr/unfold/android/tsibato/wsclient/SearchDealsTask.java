@@ -15,6 +15,7 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import android.util.Log;
 
+import gr.unfold.android.tsibato.BuildConfig;
 import gr.unfold.android.tsibato.async.AbstractAsyncTask;
 import gr.unfold.android.tsibato.data.Deal;
 
@@ -29,13 +30,13 @@ public class SearchDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Dea
     public SearchDealsTask() {
     }
     
-    public static SoapObject createRequest(String query) {
+    public static SoapObject createRequest(String query, int page) {
     	SoapObject request = new SoapObject(WS_NAMESPACE, WS_METHOD_NAME);
     	
     	PropertyInfo pageProperty = new PropertyInfo();
         pageProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
         pageProperty.setName("page");
-        pageProperty.setValue(1);
+        pageProperty.setValue(page);
         
         request.addProperty(pageProperty);
         
@@ -46,6 +47,10 @@ public class SearchDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Dea
         
         request.addProperty(queryProperty);
         
+        if (BuildConfig.DEBUG) {
+        	Log.d(TAG, "Feching deals page: " + page + "...");
+        }	
+        
     	return request;
     }
     
@@ -55,16 +60,21 @@ public class SearchDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Dea
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         // 2. Set the request parameters
         envelope.setOutputSoapObject(parameter);
+        envelope.dotNet = true;
 
         // 3. Create a HTTP Transport object to send the web service request
         HttpTransportSE httpTransport = new HttpTransportSE(WSDL_URL);
-        httpTransport.debug = true; // allows capture of raw request/response in Logcat
+        if (BuildConfig.DEBUG) {
+        	httpTransport.debug = true; // allows capture of raw request/response in Logcat
+        }
 
         // 4. Make the web service invocation
         httpTransport.call(WS_NAMESPACE + WS_METHOD_NAME, envelope);
-
-        Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
-        Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
+        
+        if (BuildConfig.DEBUG) {
+        	Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
+        	Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
+        }
         
         ArrayList<Deal> result = new ArrayList<Deal>();
         if (envelope.bodyIn instanceof SoapObject) { // SoapObject = SUCCESS
@@ -101,6 +111,10 @@ public class SearchDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Dea
     					BigDecimal.valueOf(dealPrice).setScale(2, RoundingMode.HALF_UP), BigDecimal.valueOf(dealValue).setScale(2, RoundingMode.HALF_UP), 
     					BigDecimal.valueOf(dealDiscount).setScale(0, RoundingMode.HALF_UP), dealLong, dealLat, dealMapZoom));
     		}
+    	}
+    	
+    	if (BuildConfig.DEBUG) {
+    		Log.d(TAG, "Loaded " + result.size() + "results!");
     	}
     	
     	return result;

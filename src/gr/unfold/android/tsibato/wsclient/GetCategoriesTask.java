@@ -1,7 +1,6 @@
 package gr.unfold.android.tsibato.wsclient;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.SoapFault;
@@ -11,10 +10,11 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import android.util.Log;
 
+import gr.unfold.android.tsibato.BuildConfig;
 import gr.unfold.android.tsibato.async.AbstractAsyncTask;
 import gr.unfold.android.tsibato.data.Category;
 
-public class GetCategoriesTask extends AbstractAsyncTask<SoapObject, List<Category>> {
+public class GetCategoriesTask extends AbstractAsyncTask<SoapObject, ArrayList<Category>> {
 	
 	private static final String TAG = "GetCategoriesTask";
 	
@@ -31,23 +31,28 @@ public class GetCategoriesTask extends AbstractAsyncTask<SoapObject, List<Catego
     }
     
     @Override
-    protected List<Category> executeTask(SoapObject parameter) throws Exception {
+    protected ArrayList<Category> executeTask(SoapObject parameter) throws Exception {
     	// 1. Create SOAP Envelope
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         // 2. Set the request parameters
         envelope.setOutputSoapObject(parameter);
+        envelope.dotNet = true;
 
         // 3. Create a HTTP Transport object to send the web service request
         HttpTransportSE httpTransport = new HttpTransportSE(WSDL_URL);
-        httpTransport.debug = true; // allows capture of raw request/response in Logcat
+        if (BuildConfig.DEBUG) {
+        	httpTransport.debug = true; // allows capture of raw request/response in Logcat
+        }
 
         // 4. Make the web service invocation
         httpTransport.call(WS_NAMESPACE + WS_METHOD_NAME, envelope);
 
-        Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
-        Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
+        if (BuildConfig.DEBUG) {
+        	Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
+        	Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
+        }
         
-        List<Category> result = new ArrayList<Category>();
+        ArrayList<Category> result = new ArrayList<Category>();
         if (envelope.bodyIn instanceof SoapObject) { // SoapObject = SUCCESS
             SoapObject soapObject = (SoapObject) envelope.bodyIn;
             result = parseSOAPResponse(soapObject);
@@ -59,18 +64,16 @@ public class GetCategoriesTask extends AbstractAsyncTask<SoapObject, List<Catego
         return result;
     }
     
-    private List<Category> parseSOAPResponse(SoapObject response) {
-    	List<Category> result = new ArrayList<Category>();
+    private ArrayList<Category> parseSOAPResponse(SoapObject response) {
+    	ArrayList<Category> result = new ArrayList<Category>();
     	SoapObject categoriesResult = (SoapObject) response.getProperty("GetCategoriesResult");
     	if (categoriesResult != null) {
     		for (int i = 0; i < categoriesResult.getPropertyCount(); i++) {
     			SoapObject categoryDescription = (SoapObject) categoriesResult.getProperty(i);
     			int categoryId = Integer.parseInt(categoryDescription.getPrimitivePropertySafelyAsString("Id"));
     			String categoryName = categoryDescription.getPrimitivePropertySafelyAsString("Name");
-    			boolean isSelected = Boolean.parseBoolean(categoryDescription.getPrimitivePropertySafelyAsString("IsSelected"));
     			
-    			Log.i(TAG, String.format(" --> ID: %d, desc: %s, url: %s.", categoryId, categoryName, isSelected));
-    			result.add(new Category(categoryId, categoryName, isSelected));
+    			result.add(new Category(categoryId, categoryName));
     		}
     	}
     	

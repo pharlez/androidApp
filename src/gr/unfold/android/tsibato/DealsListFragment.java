@@ -6,11 +6,14 @@ import java.util.List;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
@@ -34,7 +37,7 @@ public class DealsListFragment extends ListFragment {
 	private String mQuery;
 	
 	private ImageFetcher mImageFetcher;
-	private DealsAdapter mAdapter;
+	public DealsAdapter mAdapter;
 	
 	private int mPosition = 0;
 	private int mOffset = 0;
@@ -47,7 +50,7 @@ public class DealsListFragment extends ListFragment {
 		DealsListFragment listFragment = new DealsListFragment();
 
 		Bundle bundle = new Bundle();
-		bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", deals);      
+		bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", deals);
 		listFragment.setArguments(bundle);
 
         return listFragment;
@@ -65,20 +68,21 @@ public class DealsListFragment extends ListFragment {
 		Bundle bundle = this.getArguments();
 		if (bundle != null) {
 			mDeals = bundle.getParcelableArrayList("DEALS_PARCEL_ARRAY");
-			String query = bundle.getString("SEARCH_QUERY");
-			if (query != null) {
-				mQuery = query;
-			}
 		}
 		
 		ImageCacheParams cacheParams = new ImageCacheParams(getActivity(), IMAGE_CACHE_DIR);
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
         
         mImageFetcher = new ImageFetcher(getActivity(), mImageWidth, mImageHeight);
-        mImageFetcher.setLoadingImage(R.drawable.ic_launcher);
+        mImageFetcher.setLoadingImage(R.drawable.image_loading);
         mImageFetcher.addImageCache(getActivity().getSupportFragmentManager(), cacheParams);
 		
         mAdapter = new DealsAdapter(getActivity(), mDeals, mImageFetcher);
+        
+        if (savedInstanceState != null) {
+        	mPosition = savedInstanceState.getInt("LIST_POSITION");
+        	mOffset = savedInstanceState.getInt("LIST_OFFSET");
+        }
 		
 		//setListAdapter(mAdapter);
 	}
@@ -89,6 +93,8 @@ public class DealsListFragment extends ListFragment {
 	    super.onActivityCreated(savedInstanceState);
 	    
 	    setListAdapter(mAdapter);
+	    
+	    //getListView().setEmptyView(emptyView(R.layout.list_empty));
 	    
 	    setEmptyText(getString(R.string.list_empty_text));
 	    
@@ -101,7 +107,7 @@ public class DealsListFragment extends ListFragment {
                     mImageFetcher.setPauseWork(true);
                 } else {
                     mImageFetcher.setPauseWork(false);
-                }                
+                }
 			}
 			
 			@Override
@@ -113,6 +119,7 @@ public class DealsListFragment extends ListFragment {
 						view.getChildAt(view.getChildCount() - 1).getBottom() <= view.getHeight()) {
 					// List has scrolled all the way to the bottom, so show toolbar
 					mScrollUpDown.onScrollUp();
+					mUpdater.onUpdateDeals();
 				} else {
 					int position = view.getFirstVisiblePosition();
 			        View v = view.getChildAt(0);
@@ -154,6 +161,7 @@ public class DealsListFragment extends ListFragment {
 		
 		mImageFetcher.setExitTasksEarly(false);
 		mAdapter.notifyDataSetChanged();
+		
 	}
 	
 	@Override
@@ -171,6 +179,16 @@ public class DealsListFragment extends ListFragment {
 	}
 	
 	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	  // Save UI state changes to the savedInstanceState.
+	  // This bundle will be passed to onCreate if the process is
+	  // killed and restarted.
+	  savedInstanceState.putInt("LIST_POSITION", mPosition);
+	  savedInstanceState.putInt("LIST_OFFSET", mOffset);
+	  super.onSaveInstanceState(savedInstanceState);
+	}
+	
+	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 
@@ -184,6 +202,11 @@ public class DealsListFragment extends ListFragment {
             throw new ClassCastException(activity.toString()
                     + " must implement OnDealSelectedListener, OnScrollUpOrDownListener and OnDealsDataChangedListener");
         }
+	}
+	
+	public void updateDeals(ArrayList<Deal> deals) {
+		mDeals = deals;
+		mAdapter.notifyDataSetChanged();
 	}
 	
 }

@@ -76,24 +76,11 @@
     
     <ImageView
         android:id="@+id/dealimage"
-        android:layout_width="@dimen/image_thumbnail_width"
-        android:layout_height="@dimen/image_thumbnail_height"
+        android:layout_width="@dimen/image_large_width"
+        android:layout_height="@dimen/image_large_height"
         android:layout_marginTop="18dp"
         android:layout_marginLeft="18dp"
-        android:layout_below="@id/dealpricebar" />
-    
-    <TextView
-        android:id="@+id/dealtitle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/dealimage"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="18dp"
-        android:layout_marginRight="25dp"
-        android:textColor="#555555"
-        android:textIsSelectable="true"
-        android:textSize="11.5sp"
-        tools:ignore="SmallSp"/>
+        android:layout_below="@id/dealpricebar" />    
     
     <RelativeLayout
         android:id="@+id/dealActions"
@@ -120,5 +107,19 @@
 	        android:onClick="goToWebPage" />
         
     </RelativeLayout>
+    
+	<TextView
+        android:id="@+id/dealtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/dealimage"
+        android:layout_above="@id/dealActions"        
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="25dp"
+        android:textColor="#555555"
+        android:textIsSelectable="true"
+        android:textSize="11.5sp"
+        tools:ignore="SmallSp"/>
     
 </RelativeLayout>

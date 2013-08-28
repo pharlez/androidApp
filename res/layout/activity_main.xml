@@ -37,5 +37,32 @@
    	        android:background="@drawable/map_btn_state" />
    	    
     </LinearLayout>
+    
+  	<LinearLayout
+  	    android:id="@+id/empty"
+   		android:layout_width="match_parent"
+   		android:layout_height="match_parent"
+   		android:orientation="vertical"
+   		android:layout_alignParentTop="true"
+   		android:gravity="center"
+   		android:visibility="gone" >
+   
+	    <TextView
+	        android:id="@+id/empty_text"
+	        android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+	        android:text="@string/list_empty_text"
+	        android:color="#000000"
+	        android:textSize="14sp"
+	        android:layout_marginBottom="10dp" />
+	    
+	    <Button
+	        android:id="@+id/refresh_button"
+	        android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+	    	android:onClick="refreshDeals"
+	        android:text="Refresh" />
+	
+	</LinearLayout>
 
 </RelativeLayout>

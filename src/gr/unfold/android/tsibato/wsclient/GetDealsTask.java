@@ -15,6 +15,7 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import android.util.Log;
 
+import gr.unfold.android.tsibato.BuildConfig;
 import gr.unfold.android.tsibato.async.AbstractAsyncTask;
 import gr.unfold.android.tsibato.data.Deal;
 
@@ -30,22 +31,28 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     
     }
     
-    public static SoapObject createRequest() {
+    public static SoapObject createRequest(int page, int locationId, ArrayList<Integer> categories) {
     	SoapObject request = new SoapObject(WS_NAMESPACE, WS_METHOD_NAME);
     	
     	PropertyInfo locationProperty = new PropertyInfo();
     	locationProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
     	locationProperty.setName("locationId");
-    	locationProperty.setValue(1);
+    	locationProperty.setValue(locationId);
         
         request.addProperty(locationProperty);
 
         PropertyInfo pageProperty = new PropertyInfo();
         pageProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
         pageProperty.setName("page");
-        pageProperty.setValue(1);
+        pageProperty.setValue(page);
         
         request.addProperty(pageProperty);
+        
+        SoapObject soapCategories = new SoapObject(WS_NAMESPACE, "categoryIds");
+        for (Integer i : categories){
+        	soapCategories.addProperty("int", i);
+        }
+        request.addSoapObject(soapCategories);
         
         PropertyInfo rankProperty = new PropertyInfo();
         rankProperty.setNamespace(WS_NAMESPACE); // to ensure that the element-name is prefixed with the namespace
@@ -60,15 +67,11 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
         for (Integer i : providers){
         	soapProviders.addProperty("int", i);
         }
-        request.addSoapObject(soapProviders);
+        request.addSoapObject(soapProviders);        
         
-        List<Integer> categories =  new ArrayList<Integer>();
-
-        SoapObject soapCategories = new SoapObject(WS_NAMESPACE, "categoryIds");
-        for (Integer i : categories){
-        	soapCategories.addProperty("int", i);
+        if (BuildConfig.DEBUG) {
+        	Log.d(TAG, "Feching deals page: " + page + "...");
         }
-        request.addSoapObject(soapCategories);
         
         return request;
     }
@@ -79,16 +82,21 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         // 2. Set the request parameters
         envelope.setOutputSoapObject(parameter);
+        envelope.dotNet = true;
 
         // 3. Create a HTTP Transport object to send the web service request
         HttpTransportSE httpTransport = new HttpTransportSE(WSDL_URL);
-        httpTransport.debug = true; // allows capture of raw request/response in Logcat
-
+        if (BuildConfig.DEBUG) {
+        	httpTransport.debug = true; // allows capture of raw request/response in Logcat
+        }
+        
         // 4. Make the web service invocation
         httpTransport.call(WS_NAMESPACE + WS_METHOD_NAME, envelope);
-
-        Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
-        Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
+        
+        if (BuildConfig.DEBUG) {
+        	Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
+        	Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
+        }
         
         ArrayList<Deal> result = new ArrayList<Deal>();
         if (envelope.bodyIn instanceof SoapObject) { // SoapObject = SUCCESS
@@ -125,6 +133,10 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     					BigDecimal.valueOf(dealPrice).setScale(2, RoundingMode.HALF_UP), BigDecimal.valueOf(dealValue).setScale(2, RoundingMode.HALF_UP), 
     					BigDecimal.valueOf(dealDiscount).setScale(0, RoundingMode.HALF_UP), dealLong, dealLat, dealMapZoom));
     		}
+    	}
+    	
+    	if (BuildConfig.DEBUG) {
+    		Log.d(TAG, "Loaded " + result.size() + "results!");
     	}
     	
     	return result;

@@ -1,6 +1,7 @@
 package gr.unfold.android.tsibato;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -28,6 +30,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import gr.unfold.android.tsibato.async.AsyncTaskListener;
@@ -59,6 +62,17 @@ public class MainActivity extends FragmentActivity
 	
 	private ArrayList<Deal> mDeals;
 	private String mQuery;
+	
+	private int mSelectedCity;
+	private ArrayList<Integer> mSelectedCategories;
+	private double mSelectedCityLong;
+	private double mSelectedCityLat;
+	private double mSelectedCityMapZoom;
+	
+	private boolean isUpdating;
+	private boolean noMoreDeals;
+	
+	public int mDealsPage;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +109,12 @@ public class MainActivity extends FragmentActivity
             if (savedInstanceState != null) {
             	mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
             	mQuery = savedInstanceState.getString("SEARCH_QUERY");
+            	mDealsPage = savedInstanceState.getInt("DEALS_PAGE_LOADED");
+            	mSelectedCity = savedInstanceState.getInt("DEALS_SELECTED_CITY");
+            	mSelectedCityLong = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LONG");
+            	mSelectedCityLat = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LAT");
+            	mSelectedCityMapZoom = savedInstanceState.getDouble("DEALS_SELECTED_CITY_MAPZOOM");
+            	mSelectedCategories = savedInstanceState.getIntegerArrayList("DEALS_SELECTED_CATEGORIES");
             	
             	onSearchQueryChanged(mQuery);
             	mPager.setAdapter(mPagerAdapter);
@@ -106,11 +126,17 @@ public class MainActivity extends FragmentActivity
             	return;
             }
             
+            getSettings();
+            
+            Log.d(TAG, "SELECTED CITY ID: " + mSelectedCity);
+            
             Intent intent = getIntent();
             
             if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             	String query = intent.getStringExtra(SearchManager.QUERY);
             	int activeView = intent.getIntExtra("ACTIVE_VIEW_PAGE", 0);
+            	
+				mQuery = query;
             	
             	searchDeals(query, activeView);
             	
@@ -118,10 +144,30 @@ public class MainActivity extends FragmentActivity
             			DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
                 suggestions.saveRecentQuery(query, null);
                 
+                setHomeOnSearch();
+                
             } else {
             	getDeals();
             }
         }
+	}
+	
+	private void getSettings() {
+		SharedPreferences prefs = getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE);
+        
+        mSelectedCity = prefs.getInt("SELECTED_CITY_ID", 0);
+        mSelectedCityLong = (double) prefs.getFloat("SELECTED_CITY_LONG", 0.0f);
+        mSelectedCityLat = (double) prefs.getFloat("SELECTED_CITY_LAT", 0.0f);
+        mSelectedCityMapZoom = (double) prefs.getFloat("SELECTED_CITY_MAPZOOM", -1.0f);
+        
+        String selectedCategories = prefs.getString("SELECTED_CATEGORIES_IDS", "");
+        StringTokenizer strToken = new StringTokenizer(selectedCategories, ",");
+        mSelectedCategories = new ArrayList<Integer>();
+        while (strToken.hasMoreTokens()) {
+        	int categoryId = Integer.parseInt(strToken.nextToken());
+        	mSelectedCategories.add(categoryId);
+        }
+        Log.d(TAG, "Selected categories: " + mSelectedCategories.toString());
 	}
 	
 	private void getDeals() {
@@ -132,11 +178,16 @@ public class MainActivity extends FragmentActivity
 			@Override
             public void onTaskCompleteSuccess(ArrayList<Deal> result) {
 				mDeals = result;
+				mDealsPage = 1;
                 displayDeals(result);
+                if (result.size() == 0) {
+					noMoreDeals = true;
+				}
             }
 
             @Override
             public void onTaskFailed(Exception cause) {
+            	displayEmpty();
                 Log.e(TAG, cause.getMessage(), cause);
                 showToastMessage(R.string.failed_msg);
             }
@@ -153,9 +204,9 @@ public class MainActivity extends FragmentActivity
 		    public void onStopProgress() {
 		        progressDialog.dismiss();
 		    }
-		});
+		});	
 		
-		task.execute(GetDealsTask.createRequest());
+		task.execute(GetDealsTask.createRequest(1, mSelectedCity, mSelectedCategories));
 	}
 	
 	private void searchDeals(final String query, final int activeView) {
@@ -166,13 +217,17 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTaskCompleteSuccess(ArrayList<Deal> result) {
 				mDeals = result;
-				mQuery = query;
+				mDealsPage = 1;
 				displayDeals(result, activeView);
 				onSearchQueryChanged(query);
+				if (result.size() == 0) {
+					noMoreDeals = true;
+				}
 			}
 			
 			@Override
 			public void onTaskFailed(Exception cause) {
+				displayEmpty();
 				Log.e(TAG, cause.getMessage(), cause);
 				showToastMessage(R.string.failed_msg);
 			}
@@ -191,7 +246,7 @@ public class MainActivity extends FragmentActivity
 			}
 		});
 		
-		task.execute(SearchDealsTask.createRequest(query));
+		task.execute(SearchDealsTask.createRequest(query, 1));
 	}
 	
 	private void displayDeals(ArrayList<Deal> results) {
@@ -205,6 +260,11 @@ public class MainActivity extends FragmentActivity
 		selectListOrMap(activeViewPage);
 	}
 	
+	private void displayEmpty() {
+		findViewById(R.id.toolbar).setVisibility(View.GONE);
+		findViewById(R.id.empty).setVisibility(View.VISIBLE);
+	}
+	
 	public void onDealSelected(Deal deal) {
 		Intent intent = new Intent(this, DealActivity.class);
 		intent.putExtra("DEAL_PARCEL", deal);
@@ -213,6 +273,152 @@ public class MainActivity extends FragmentActivity
 	
 	public void onDealsDataChanged(ArrayList<Deal> deals) {
 		mDeals = deals;
+	}
+	
+	public void refreshDeals(View view) {
+		findViewById(R.id.empty).setVisibility(View.GONE);
+		findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
+		if (mQuery != null) {
+			searchDeals(mQuery, 0);
+		} else {
+			getDeals();
+		}		
+	}
+	
+	public void onUpdateDeals() {
+		if (isUpdating || noMoreDeals) return;
+		
+		if (mQuery != null) {
+			SearchDealsTask task = new SearchDealsTask();
+			task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
+				
+				@Override
+				public void onTaskCompleteSuccess(ArrayList<Deal> result) {
+					updateDeals(result);
+					isUpdating = false;
+					if (result.size() == 0) {
+						noMoreDeals = true;
+					} else {
+						mDealsPage += 1;
+					}
+				}
+				
+				@Override
+				public void onTaskFailed(Exception cause) {
+					isUpdating = false;
+					Log.e(TAG, cause.getMessage(), cause);
+					showToastMessage(R.string.failed_msg);
+				}
+			});
+			
+			task.setProgressTracker(new IProgressTracker() {
+				
+				@Override
+				public void onStartProgress() {
+					progressDialog.show();
+				}
+				
+				@Override
+				public void onStopProgress() {
+					progressDialog.dismiss();
+				}
+			});
+			
+			task.execute(SearchDealsTask.createRequest(mQuery, mDealsPage + 1));
+		} else {
+			GetDealsTask task = new GetDealsTask();
+			task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
+
+				@Override
+	            public void onTaskCompleteSuccess(ArrayList<Deal> result) {
+					updateDeals(result);
+					isUpdating = false;
+					if (result.size() == 0) {
+						noMoreDeals = true;
+					} else {
+						mDealsPage += 1;
+					}
+	            }
+
+	            @Override
+	            public void onTaskFailed(Exception cause) {
+	            	isUpdating = false;
+	                Log.e(TAG, cause.getMessage(), cause);
+	                showToastMessage(R.string.failed_msg);
+	            }
+			});
+			
+			task.setProgressTracker(new IProgressTracker() {
+				
+				@Override
+			    public void onStartProgress() {
+			        progressDialog.show();
+			    }
+
+			    @Override
+			    public void onStopProgress() {
+			        progressDialog.dismiss();
+			    }
+			});
+			
+			task.execute(GetDealsTask.createRequest(mDealsPage + 1, mSelectedCity, mSelectedCategories));
+		}
+		isUpdating = true;
+	}
+	
+	private void updateDeals(ArrayList<Deal> deals) {
+		mDeals.addAll(deals);
+		mListFragment.updateDeals(mDeals);
+		mMapFragment.updateDeals(mDeals);
+	}
+	
+	private void onSettingsChanged() {
+		noMoreDeals = false;
+		
+		getSettings();
+		
+		GetDealsTask task = new GetDealsTask();
+		task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
+
+			@Override
+            public void onTaskCompleteSuccess(ArrayList<Deal> result) {
+				refreshDeals(result);
+				mDealsPage = 1;
+				if (result.size() == 0) {
+					noMoreDeals = true;
+				}
+            }
+
+            @Override
+            public void onTaskFailed(Exception cause) {
+            	noMoreDeals = true;
+                Log.e(TAG, cause.getMessage(), cause);
+                showToastMessage(R.string.failed_msg);
+            }
+		});
+		
+		task.setProgressTracker(new IProgressTracker() {
+			
+			@Override
+		    public void onStartProgress() {
+		        progressDialog.show();
+		    }
+
+		    @Override
+		    public void onStopProgress() {
+		        progressDialog.dismiss();
+		    }
+		});
+		
+		task.execute(GetDealsTask.createRequest(1, mSelectedCity, mSelectedCategories));
+	}
+	
+	private void refreshDeals(ArrayList<Deal> deals) {
+		mDeals.clear();
+		mDeals.addAll(deals);
+		mListFragment.updateDeals(mDeals);
+		mMapFragment.updateDeals(mDeals);
+		mMapFragment.reCenterMap(mSelectedCityLong, mSelectedCityLat, mSelectedCityMapZoom);
 	}
 	
 	public void selectListOrMap(int currentPagerItem) {
@@ -225,18 +431,6 @@ public class MainActivity extends FragmentActivity
 				findViewById(R.id.button_map).setSelected(true);
 				findViewById(R.id.button_list).setSelected(false);
 				return;
-		}
-	}
-	
-	public void onListMapVisibilityChanged(boolean isListVisible) {
-		if (isListVisible) {
-			findViewById(R.id.button_list).setSelected(true);
-			findViewById(R.id.button_map).setSelected(false);
-			//this.isListVisible = true;
-		} else {
-			findViewById(R.id.button_map).setSelected(true);
-			findViewById(R.id.button_list).setSelected(false);
-			//this.isListVisible = false;
 		}
 	}
 	
@@ -256,11 +450,13 @@ public class MainActivity extends FragmentActivity
 	
 	public void onScrollUp() {
 		findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
+//		if (noMoreDeals) {
+//			noMoreDeals = false;
+//		}
 	}
 	
 	public void onScrollDown() {
-		LinearLayout toolbar = (LinearLayout) findViewById(R.id.toolbar);
-		toolbar.setVisibility(View.GONE);
+		findViewById(R.id.toolbar).setVisibility(View.GONE);
 	}
 	
 	@Override
@@ -271,6 +467,12 @@ public class MainActivity extends FragmentActivity
 	  savedInstanceState.putParcelableArrayList("DEALS_PARCEL_ARRAY", mDeals);
 	  savedInstanceState.putString("SEARCH_QUERY", mQuery);
 	  savedInstanceState.putInt("ACTIVE_VIEW_PAGE", mPager.getCurrentItem());
+	  savedInstanceState.putInt("DEALS_PAGE_LOADED", mDealsPage);
+	  savedInstanceState.putInt("DEALS_SELECTED_CITY", mSelectedCity);
+  	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_LONG", mSelectedCityLong);
+	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_LAT", mSelectedCityLat);
+	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_MAPZOOM", mSelectedCityMapZoom);
+	  savedInstanceState.putIntegerArrayList("DEALS_SELECTED_CATEGORIES", mSelectedCategories);
 	  super.onSaveInstanceState(savedInstanceState);
 	}
 	
@@ -286,16 +488,32 @@ public class MainActivity extends FragmentActivity
 	@Override
     protected void onResume() {
         super.onResume();
+
         if (progressDialog == null) {
             setProgressDialog();
         }
     }
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void setHomeOnSearch() {
+		if (Utils.hasHoneycomb()) {
+			ActionBar actionBar = getActionBar();
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
+	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		
+		if (mQuery != null) {
+			MenuItem settingsMenuItem = menu.findItem(R.id.settings);
+			settingsMenuItem.setEnabled(false);
+			settingsMenuItem.setVisible(false);
+		}
+		
 		mSearchMenuItem = menu.findItem(R.id.search);
 		
 		if (Utils.hasHoneycomb()) {
@@ -339,27 +557,47 @@ public class MainActivity extends FragmentActivity
 	        		onSearchRequested();
 	        	}
 	            return true;
-	        case R.id.clear_history:
-	        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	            builder.setMessage(getString(R.string.clear_history_dialog))
-	                   .setCancelable(false)
-	                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-	                       public void onClick(DialogInterface dialog, int id) {
-	                    	   clearSearchSuggestions();
-	                    	   dialog.dismiss();
-	                       }
-	                   })
-	                   .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	                       public void onClick(DialogInterface dialog, int id) {
-	                            dialog.cancel();
-	                       }
-	                   });
-	            AlertDialog alert = builder.create();
-	            alert.show();
+//	        case R.id.clear_history:
+//	        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//	            builder.setMessage(getString(R.string.clear_history_dialog))
+//	                   .setCancelable(false)
+//	                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//	                       public void onClick(DialogInterface dialog, int id) {
+//	                    	   clearSearchSuggestions();
+//	                    	   dialog.dismiss();
+//	                       }
+//	                   })
+//	                   .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//	                       public void onClick(DialogInterface dialog, int id) {
+//	                            dialog.cancel();
+//	                       }
+//	                   });
+//	            AlertDialog alert = builder.create();
+//	            alert.show();
+//	        	return true;
+	        case R.id.settings:
+	        	Intent settingsIntent = new Intent(this, SettingsActivity.class);
+	        	startActivityForResult(settingsIntent, 1);
 	        	return true;
+	        case android.R.id.home:
+	        	this.finish();
+	        	return true;
+//	        case R.id.count_deals:
+//	        	Toast.makeText(this, "Number of deals: " + mListFragment.mAdapter.getCount(), Toast.LENGTH_LONG).show();
 	        default:
 	            return false;
 	    }
+	}
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 1) {
+			if(resultCode == RESULT_OK){      
+				onSettingsChanged();
+			}
+		    if (resultCode == RESULT_CANCELED) {    
+		    	//Write your code if there's no result
+		    }
+		}
 	}
 	
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -382,7 +620,7 @@ public class MainActivity extends FragmentActivity
     	this.progressDialog = new ProgressDialog(this);
         this.progressDialog.setCancelable(false);
         this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        this.progressDialog.setMessage(getString(R.string.loading_msg));
+        this.progressDialog.setMessage(getString(R.string.loading_deals_msg));
     }
 	
 	private void showToastMessage(int messageId) {
@@ -424,11 +662,33 @@ public class MainActivity extends FragmentActivity
 	        		return mListFragment;
 	        	default:
 	        		if (mMapFragment == null) {
-	        			mMapFragment = DealsMapFragment.newInstance(mDeals);
+	        			Log.d(TAG, "Long: " + mSelectedCityLong + ", Lat: " + mSelectedCityLat + ", Zoom: " + mSelectedCityMapZoom);
+	        			mMapFragment = DealsMapFragment.newInstance(mDeals, mSelectedCityLong, mSelectedCityLat, mSelectedCityMapZoom);
 	        		}
 	        		return mMapFragment;
         	}
         }
+        
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+        	Object object = super.instantiateItem(container, position);
+        	switch (position) {
+	        	case 0:
+	        		DealsListFragment listFrag = (DealsListFragment) object;
+	        		if (listFrag != null) {
+	        			mListFragment = listFrag;
+	        		}
+	        		break;
+	        	case 1:
+	        		DealsMapFragment mapFrag = (DealsMapFragment) object;
+	        		if (mapFrag != null) {
+	        			mMapFragment = mapFrag;
+	        		}
+	        		break;
+        	}	
+        	return object;
+        }
+        
     }
 
 }

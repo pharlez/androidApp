@@ -3,6 +3,7 @@ package gr.unfold.android.tsibato;
 import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
 import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
+import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,8 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +23,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CameraPositionCreator;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -39,13 +44,20 @@ public class DealsMapFragment extends SupportMapFragment
 	private ArrayList<Deal> mDeals;
 	private String mQuery;
 	
+	private double mSelectedCityLong;
+	private double mSelectedCityLat;
+	private double mSelectedCityMapZoom;
+	
 	public DealsMapFragment() {	}
 	
-	public static DealsMapFragment newInstance(ArrayList<Deal> deals) {
+	public static DealsMapFragment newInstance(ArrayList<Deal> deals, double mapLong, double mapLat, double mapZoom) {
 		DealsMapFragment mapFragment = new DealsMapFragment();
 		
 		Bundle bundle = new Bundle();
 		bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", deals);
+		bundle.putDouble("SELECTED_CITY_LONG", mapLong);
+		bundle.putDouble("SELECTED_CITY_LAT", mapLat);
+		bundle.putDouble("SELECTED_CITY_MAPZOOM", mapZoom);
 		
 		mapFragment.setArguments(bundle);
 		
@@ -71,6 +83,9 @@ public class DealsMapFragment extends SupportMapFragment
 		Bundle bundle = this.getArguments();
 		if (bundle != null) {
 			mDeals = bundle.getParcelableArrayList("DEALS_PARCEL_ARRAY");
+			mSelectedCityLong = bundle.getDouble("SELECTED_CITY_LONG");
+			mSelectedCityLat = bundle.getDouble("SELECTED_CITY_LAT");
+			mSelectedCityMapZoom = bundle.getDouble("SELECTED_CITY_MAPZOOM");
 			String query = bundle.getString("SEARCH_QUERY");
 			if (query != null) {
 				mQuery = query;
@@ -87,9 +102,21 @@ public class DealsMapFragment extends SupportMapFragment
 	    frameLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 	    ((ViewGroup) v).addView(frameLayout, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 	    
-	    setUpMapIfNeeded();
+	    //setUpMapIfNeeded();
 	    
 	    return v;
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
+		CameraPosition camPosition = null;
+		if (savedInstanceState != null) {
+			savedInstanceState.setClassLoader(CameraPositionCreator.class.getClassLoader());
+			camPosition = (CameraPosition) savedInstanceState.getParcelable("MAP_CAMERA_POSITION");
+		} 
+		setUpMapIfNeeded(camPosition);
 	}
 	
 	@Override
@@ -97,10 +124,10 @@ public class DealsMapFragment extends SupportMapFragment
 		super.onResume();
 		
 		mUpdater.onDealsDataChanged(mDeals);
+		
 	}
-
 	
-	private void setUpMapIfNeeded() {
+	private void setUpMapIfNeeded(CameraPosition position) {
 	    // Do a null check to confirm that we have not already instantiated the map.
 		mMap = this.getMap();
         // Check if we were successful in obtaining the map.
@@ -112,9 +139,10 @@ public class DealsMapFragment extends SupportMapFragment
         	mMarkers = new ArrayList<Marker>();
         	LatLngBounds.Builder builder = new LatLngBounds.Builder();
         	
+        	mMap.clear();
+        	
 			for (Deal deal : mDeals) {
 	    		LatLng location = new LatLng(deal.lat, deal.lon);
-	    		
 	    		
 	    		Marker marker = mMap.addMarker(new MarkerOptions().position(location)
 	    						.title(deal.getSmallTitle(30))
@@ -126,16 +154,62 @@ public class DealsMapFragment extends SupportMapFragment
 			
 			mMap.setOnInfoWindowClickListener(this);
 			
-			if (mMarkers.size() > 0) {
-				LatLngBounds bounds = builder.build();
-				mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 500, 500, 0));
+			if (position != null) {
+				mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+			}
+//			else if (mMarkers.size() > 0) {
+//				LatLngBounds bounds = builder.build();
+//				mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 500, 500, 0));
+//			}
+			else {
+				mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mSelectedCityLat, mSelectedCityLong), (float) mSelectedCityMapZoom));
 			}
         }
+	}
+	
+	private void updateMap() {
+		// Do a null check to confirm that we have not already instantiated the map.
+		mMap = this.getMap();
+		// Check if we were successful in obtaining the map.
+		if (mMap != null) {
+			mMap.clear();
+			mMarkers.clear();
+			for (Deal deal : mDeals) {
+	    		LatLng location = new LatLng(deal.lat, deal.lon);
+	    		Marker marker = mMap.addMarker(new MarkerOptions().position(location)
+	    						.title(deal.getSmallTitle(30))
+	    						.snippet(deal.getSmallTitle(50)));
+	    		
+	    		mMarkers.add(marker);
+	    	}
+		}
+	}
+	
+	public void updateDeals(ArrayList<Deal> deals) {
+		mDeals = deals;
+		updateMap();
+	}
+	
+	public void reCenterMap(double mapLong, double mapLat, double mapZoom) {
+		mSelectedCityLong = mapLong;
+		mSelectedCityLat = mapLat;
+		mSelectedCityMapZoom = mapZoom;
+		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mSelectedCityLat, mSelectedCityLong), (float) mSelectedCityMapZoom));
 	}
 	
 	public void onInfoWindowClick(Marker marker) {
 		Deal deal = mDeals.get(mMarkers.indexOf(marker));
 		mCallback.onDealSelected(deal);
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	  // Save UI state changes to the savedInstanceState.
+	  // This bundle will be passed to onCreate if the process is
+	  // killed and restarted.
+	  savedInstanceState.setClassLoader(mMap.getCameraPosition().getClass().getClassLoader());
+	  savedInstanceState.putParcelable("MAP_CAMERA_POSITION", mMap.getCameraPosition());
+	  super.onSaveInstanceState(savedInstanceState);
 	}
 	
 	@Override

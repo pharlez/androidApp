@@ -55,6 +55,11 @@
                 android:value="gr.unfold.android.tsibato.MainActivity">
             </meta-data>
         </activity>
+        <activity
+            android:name="gr.unfold.android.tsibato.SettingsActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.FullScreen">
+        </activity>
         <provider android:name=".search.DealSuggestionsProvider"
               android:authorities="gr.unfold.android.tsibato.search.DealSuggestionsProvider">
 		</provider>

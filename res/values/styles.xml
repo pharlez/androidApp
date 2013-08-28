@@ -18,6 +18,9 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
     
+    <style name="AppTheme.FullScreen" parent="@android:style/Theme.Light.NoTitleBar.Fullscreen">
+    </style>
+    
     <style name="WindowTitleBackground">
         <item name="android:background">@drawable/actionbar_background</item>
         <item name="android:paddingLeft">8dp</item>

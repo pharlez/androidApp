@@ -24,19 +24,12 @@ public class DealsAdapter extends ArrayAdapter<Deal> {
 	private Context mContext;
 	private ImageFetcher mImageFetcher;
 	
-	private List<Deal> mDeals;
-	
 	public DealsAdapter(Context context, List<Deal> objects, ImageFetcher imageFetcher) {
 		super(context, android.R.layout.simple_list_item_1, objects);
 		
 		mContext = context;
 		mImageFetcher = imageFetcher;
-		mDeals = objects;
 		inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	}
-	
-	public List<Deal> getDeals() {
-		return mDeals;
 	}
 	
 	@Override

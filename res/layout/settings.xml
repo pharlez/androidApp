@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/settings_background" >
+    
+    <ImageView
+        android:id="@+id/settingsLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+		android:layout_marginTop="12dp"
+        android:layout_marginLeft="24dp"
+        android:src="@drawable/ic_settings_logo" />
+    
+    <ImageView 
+        android:id="@+id/settingsCharacter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_character" />
+    
+    <TextView 
+        android:id="@+id/cityTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/settingsLogo"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:focusable="false"
+		android:includeFontPadding="false"
+        android:lineSpacingExtra="0dp"
+        android:shadowColor="#4cffffff"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="1"
+        android:singleLine="true"
+        android:textColor="#01395b"
+        android:textIsSelectable="false"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:text="@string/city_title" />
+    
+    <LinearLayout
+        android:id="@+id/citySpinnerContainer"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/cityTitle"
+        android:paddingBottom="3dp"
+        android:paddingRight="3dp"
+        android:background="@drawable/settings_spinner_background">
+        
+	    <Spinner
+	        android:id="@+id/citySpinner"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:minWidth="230dp" />
+    
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/categoriesTitleContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/citySpinnerContainer"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal" >
+        
+        <TextView 
+	        android:id="@+id/categoryTitle"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="30dp"
+	        android:focusable="false"
+			android:includeFontPadding="false"
+        	android:lineSpacingExtra="0dp"
+        	android:shadowColor="#4cffffff"
+        	android:shadowDx="0"
+        	android:shadowDy="1"
+        	android:shadowRadius="1"
+        	android:singleLine="true"
+        	android:textColor="#01395b"
+        	android:textIsSelectable="false"
+        	android:textSize="18dp"
+        	android:textStyle="bold"
+	        android:text="@string/category_title" />
+        
+        <TextView
+            android:id="@+id/categorySelectAllTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:focusable="false"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
+            android:singleLine="true"
+            android:text="@string/select_all_categories"
+            android:textColor="#04cfe7"
+            android:textIsSelectable="false"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+        
+        <CheckBox 
+            android:id="@+id/categorySelectAllCheck"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_marginLeft="8dp"
+        	android:text="" />
+        
+	</LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/settingsButtons"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="18dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:orientation="horizontal" >
+	    
+        <Button
+            android:id="@+id/settingsCancelBtn"
+            android:layout_width="120dp"
+            android:layout_height="36dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/settings_cancel_background"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
+            android:text="@string/settings_cancel"
+            android:textColor="#ffffff"
+            android:textIsSelectable="false"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+        
+        <Button
+            android:id="@+id/settingsOkBtn"
+            android:layout_width="120dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/settings_ok_background"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
+            android:text="@string/settings_ok"
+            android:textColor="#ffffff"
+            android:textIsSelectable="false"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+        
+    </LinearLayout>
+    
+	<ListView
+        android:id="@+id/categoriesList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_above="@id/settingsButtons"
+        android:layout_below="@id/categoriesTitleContainer"
+        android:background="@drawable/categories_background"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp" />
+
+</RelativeLayout>

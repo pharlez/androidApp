@@ -1,16 +1,48 @@
 package gr.unfold.android.tsibato.data;
 
-public class Category {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Category implements Parcelable {
 	
-	private final int id;
-	private final String name;
-	private final boolean isSelected;
+	public int id;
+	public String name;
 	
-	public Category(int id, String name, boolean isSelected) {
+	public Category(int id, String name) {
 		this.id = id;
 		this.name = name;
-		this.isSelected = isSelected;
 	}
+	
+	public Category(Parcel in) {
+		readFromParcel(in);
+	}
+	
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+	
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(this.id);
+		dest.writeString(this.name);
+	}
+	
+	private void readFromParcel(Parcel in) {
+		this.id = in.readInt();
+		this.name = in.readString();
+	}
+	
+	public static final Parcelable.Creator<Category> CREATOR =
+	    	new Parcelable.Creator<Category>() {
+	            public Category createFromParcel(Parcel in) {
+	                return new Category(in);
+	            }
+	 
+	            public Category[] newArray(int size) {
+	                return new Category[size];
+	            }
+	        };
 	
 	public int getId() {
 		return id;
@@ -20,8 +52,8 @@ public class Category {
 		return this.name;
 	}
 	
-	public boolean isSelected() {
-		return this.isSelected;
+	public String toString() {
+		return name;
 	}
 	
 }

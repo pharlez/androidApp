@@ -8,4 +8,6 @@ public interface OnDealsChangedListener {
 	
 	public void onDealsDataChanged(ArrayList<Deal> deals);
 	
+	public void onUpdateDeals();
+	
 }
