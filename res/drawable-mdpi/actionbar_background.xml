@@ -2,11 +2,11 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
     <item>
         <shape android:shape="rectangle" >
-        	<solid android:color="#b1eef4" />
-        	<!-- <solid android:color="#ff602b" /> -->
+        	<!-- <solid android:color="#b1eef4" /> -->
+        	<solid android:color="#014d71" />
         </shape>
     </item>
-    <item
+    <!-- <item
 		android:drawable="@drawable/toolbar_pattern">        
-	</item>
+	</item> -->
 </layer-list>

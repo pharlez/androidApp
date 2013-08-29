@@ -97,6 +97,7 @@ public class SettingsActivity extends Activity implements OnClickListener {
         	totalItemsChecked += 1;
         }
         CheckBox cb = (CheckBox) findViewById(R.id.categorySelectAllCheck);
+        TextView selectAllTextView = (TextView) findViewById(R.id.categorySelectAllTitle);			
         if (totalItemsChecked == mCategories.size()) {
         	cb.setChecked(true);
         } else if (totalItemsChecked == 0) {

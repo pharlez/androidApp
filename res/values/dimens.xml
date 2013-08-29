@@ -12,5 +12,6 @@
     <dimen name="image_large_width">160dp</dimen>
     <dimen name="radius_corner_button">10dp</dimen>
     <dimen name="scroll_animation_smoothing">3dp</dimen>
+    <dimen name="home_up_padding">5dp</dimen>
 
 </resources>

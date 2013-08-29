@@ -34,7 +34,6 @@ public class DealsListFragment extends ListFragment {
 	private int mImageWidth;
 	
 	private ArrayList<Deal> mDeals;
-	private String mQuery;
 	
 	private ImageFetcher mImageFetcher;
 	public DealsAdapter mAdapter;
@@ -69,7 +68,7 @@ public class DealsListFragment extends ListFragment {
 		if (bundle != null) {
 			mDeals = bundle.getParcelableArrayList("DEALS_PARCEL_ARRAY");
 		}
-		
+
 		ImageCacheParams cacheParams = new ImageCacheParams(getActivity(), IMAGE_CACHE_DIR);
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
         
@@ -77,12 +76,17 @@ public class DealsListFragment extends ListFragment {
         mImageFetcher.setLoadingImage(R.drawable.image_loading);
         mImageFetcher.addImageCache(getActivity().getSupportFragmentManager(), cacheParams);
 		
-        mAdapter = new DealsAdapter(getActivity(), mDeals, mImageFetcher);
+        if (mDeals != null) {
+        	mAdapter = new DealsAdapter(getActivity(), mDeals, mImageFetcher);
+        }
         
         if (savedInstanceState != null) {
         	mPosition = savedInstanceState.getInt("LIST_POSITION");
         	mOffset = savedInstanceState.getInt("LIST_OFFSET");
         }
+        
+        Log.d(TAG, "On Create, ListFragment: " + this.toString());
+		Log.d(TAG, "On Create, Adapter: " + mAdapter.toString());
 		
 		//setListAdapter(mAdapter);
 	}
@@ -180,12 +184,12 @@ public class DealsListFragment extends ListFragment {
 	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-	  // Save UI state changes to the savedInstanceState.
-	  // This bundle will be passed to onCreate if the process is
-	  // killed and restarted.
-	  savedInstanceState.putInt("LIST_POSITION", mPosition);
-	  savedInstanceState.putInt("LIST_OFFSET", mOffset);
-	  super.onSaveInstanceState(savedInstanceState);
+	    // Save UI state changes to the savedInstanceState.
+	    // This bundle will be passed to onCreate if the process is
+	    // killed and restarted.
+		savedInstanceState.putInt("LIST_POSITION", mPosition);
+		savedInstanceState.putInt("LIST_OFFSET", mOffset);
+		super.onSaveInstanceState(savedInstanceState);
 	}
 	
 	@Override
@@ -206,6 +210,8 @@ public class DealsListFragment extends ListFragment {
 	
 	public void updateDeals(ArrayList<Deal> deals) {
 		mDeals = deals;
+		Log.d(TAG, "On Update, ListFragment: " + this.toString());
+		Log.d(TAG, "On Update, Adapter: " + mAdapter.toString());
 		mAdapter.notifyDataSetChanged();
 	}
 	

@@ -167,6 +167,7 @@ containing a value of this type.
          */
         public static final int activity_horizontal_margin=0x7f080003;
         public static final int activity_vertical_margin=0x7f080004;
+        public static final int home_up_padding=0x7f08000b;
         public static final int image_large_height=0x7f080007;
         public static final int image_large_width=0x7f080008;
         public static final int image_thumbnail_height=0x7f080005;
@@ -211,37 +212,41 @@ containing a value of this type.
         public static final int ic_arrow=0x7f020021;
         public static final int ic_arrow_white=0x7f020022;
         public static final int ic_character=0x7f020023;
-        public static final int ic_launcher=0x7f020024;
-        public static final int ic_list=0x7f020025;
-        public static final int ic_logo=0x7f020026;
-        public static final int ic_logo_white=0x7f020027;
-        public static final int ic_map=0x7f020028;
-        public static final int ic_menu_search=0x7f020029;
-        public static final int ic_menu_search_new=0x7f02002a;
-        public static final int ic_menu_settings=0x7f02002b;
-        public static final int ic_settings_logo=0x7f02002c;
-        public static final int ic_share=0x7f02002d;
-        public static final int image_loading=0x7f02002e;
-        public static final int item_btn_state=0x7f02002f;
-        public static final int item_button=0x7f020030;
-        public static final int item_selector_even=0x7f020031;
-        public static final int item_selector_odd=0x7f020032;
-        public static final int item_share=0x7f020033;
-        public static final int list_btn_selected=0x7f020034;
-        public static final int list_btn_state=0x7f020035;
-        public static final int list_button=0x7f020036;
-        public static final int map_btn_selected=0x7f020037;
-        public static final int map_btn_state=0x7f020038;
-        public static final int map_button=0x7f020039;
-        public static final int pattern=0x7f02003a;
-        public static final int pricebar_background=0x7f02003b;
-        public static final int pricebar_pattern=0x7f02003c;
-        public static final int settings_background=0x7f02003d;
-        public static final int settings_cancel_background=0x7f02003e;
-        public static final int settings_ok_background=0x7f02003f;
-        public static final int settings_spinner_background=0x7f020040;
-        public static final int toolbar_background=0x7f020041;
-        public static final int toolbar_pattern=0x7f020042;
+        public static final int ic_character_bottom=0x7f020024;
+        public static final int ic_launcher=0x7f020025;
+        public static final int ic_list=0x7f020026;
+        public static final int ic_logo=0x7f020027;
+        public static final int ic_logo_old=0x7f020028;
+        public static final int ic_logo_white=0x7f020029;
+        public static final int ic_map=0x7f02002a;
+        public static final int ic_menu_search=0x7f02002b;
+        public static final int ic_menu_search_native=0x7f02002c;
+        public static final int ic_menu_settings=0x7f02002d;
+        public static final int ic_settings_logo=0x7f02002e;
+        public static final int ic_settings_logo_old=0x7f02002f;
+        public static final int ic_share=0x7f020030;
+        public static final int image_loading=0x7f020031;
+        public static final int item_btn_state=0x7f020032;
+        public static final int item_button=0x7f020033;
+        public static final int item_selector_even=0x7f020034;
+        public static final int item_selector_odd=0x7f020035;
+        public static final int item_share=0x7f020036;
+        public static final int list_btn_selected=0x7f020037;
+        public static final int list_btn_state=0x7f020038;
+        public static final int list_button=0x7f020039;
+        public static final int map_btn_selected=0x7f02003a;
+        public static final int map_btn_state=0x7f02003b;
+        public static final int map_button=0x7f02003c;
+        public static final int pattern=0x7f02003d;
+        public static final int pricebar_background=0x7f02003e;
+        public static final int pricebar_pattern=0x7f02003f;
+        public static final int settings_background=0x7f020040;
+        public static final int settings_cancel_background=0x7f020041;
+        public static final int settings_ok_background=0x7f020042;
+        public static final int settings_spinner_background=0x7f020043;
+        public static final int splash_logo=0x7f020044;
+        public static final int toolbar_background=0x7f020045;
+        public static final int toolbar_pattern=0x7f020046;
     }
     public static final class id {
         public static final int button_list=0x7f060007;
@@ -271,15 +276,17 @@ containing a value of this type.
         public static final int normal=0x7f060001;
         public static final int refresh_button=0x7f06000b;
         public static final int satellite=0x7f060002;
-        public static final int search=0x7f060024;
-        public static final int settings=0x7f060025;
+        public static final int search=0x7f060026;
+        public static final int settings=0x7f060027;
         public static final int settingsButtons=0x7f06001f;
         public static final int settingsCancelBtn=0x7f060020;
         public static final int settingsCharacter=0x7f060017;
         public static final int settingsLogo=0x7f060016;
         public static final int settingsOkBtn=0x7f060021;
-        public static final int share=0x7f060023;
+        public static final int share=0x7f060025;
         public static final int shareBtn=0x7f060012;
+        public static final int splashLogo=0x7f060023;
+        public static final int splash_character=0x7f060024;
         public static final int terrain=0x7f060003;
         public static final int toolbar=0x7f060006;
     }
@@ -288,6 +295,7 @@ containing a value of this type.
         public static final int item_deal=0x7f030001;
         public static final int list_deal=0x7f030002;
         public static final int settings=0x7f030003;
+        public static final int splash=0x7f030004;
     }
     public static final class menu {
         public static final int detail=0x7f0a0000;
@@ -395,8 +403,8 @@ containing a value of this type.
         public static final int shareVia=0x7f070023;
     }
     public static final class style {
-        public static final int AppActionBar=0x7f090004;
-        public static final int AppActionBarTitle=0x7f090005;
+        public static final int AppActionBar=0x7f090005;
+        public static final int AppActionBarTitle=0x7f090006;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -419,6 +427,7 @@ containing a value of this type.
          */
         public static final int AppTheme=0x7f090001;
         public static final int AppTheme_FullScreen=0x7f090002;
+        public static final int SplashScreen=0x7f090004;
         public static final int WindowTitleBackground=0x7f090003;
     }
     public static final class xml {

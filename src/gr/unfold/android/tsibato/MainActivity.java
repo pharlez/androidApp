@@ -5,6 +5,7 @@ import java.util.StringTokenizer;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
@@ -25,12 +27,15 @@ import android.widget.Toast;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.util.Log;
 
 import gr.unfold.android.tsibato.async.AsyncTaskListener;
@@ -73,6 +78,8 @@ public class MainActivity extends FragmentActivity
 	private boolean noMoreDeals;
 	
 	public int mDealsPage;
+	
+	protected Dialog mSplashDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -108,27 +115,27 @@ public class MainActivity extends FragmentActivity
             // we should load the data from bundle
             if (savedInstanceState != null) {
             	mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
-            	mQuery = savedInstanceState.getString("SEARCH_QUERY");
-            	mDealsPage = savedInstanceState.getInt("DEALS_PAGE_LOADED");
-            	mSelectedCity = savedInstanceState.getInt("DEALS_SELECTED_CITY");
-            	mSelectedCityLong = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LONG");
-            	mSelectedCityLat = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LAT");
-            	mSelectedCityMapZoom = savedInstanceState.getDouble("DEALS_SELECTED_CITY_MAPZOOM");
-            	mSelectedCategories = savedInstanceState.getIntegerArrayList("DEALS_SELECTED_CATEGORIES");
-            	
-            	onSearchQueryChanged(mQuery);
-            	mPager.setAdapter(mPagerAdapter);
-            	
-            	int activeViewPage = savedInstanceState.getInt("ACTIVE_VIEW_PAGE");
-            	mPager.setCurrentItem(activeViewPage);
-            	selectListOrMap(activeViewPage);
-            	
-            	return;
+	            mQuery = savedInstanceState.getString("SEARCH_QUERY");
+	            mDealsPage = savedInstanceState.getInt("DEALS_PAGE_LOADED");
+	            mSelectedCity = savedInstanceState.getInt("DEALS_SELECTED_CITY");
+	            mSelectedCityLong = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LONG");
+	            mSelectedCityLat = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LAT");
+	            mSelectedCityMapZoom = savedInstanceState.getDouble("DEALS_SELECTED_CITY_MAPZOOM");
+	            mSelectedCategories = savedInstanceState.getIntegerArrayList("DEALS_SELECTED_CATEGORIES");
+	            	
+	            if (mDeals != null) {
+	            	onSearchQueryChanged(mQuery);
+	            	mPager.setAdapter(mPagerAdapter);
+	            	
+	            	int activeViewPage = savedInstanceState.getInt("ACTIVE_VIEW_PAGE");
+	            	mPager.setCurrentItem(activeViewPage);
+	            	selectListOrMap(activeViewPage);
+	            	
+	            	return;
+            	}
             }
             
             getSettings();
-            
-            Log.d(TAG, "SELECTED CITY ID: " + mSelectedCity);
             
             Intent intent = getIntent();
             
@@ -183,6 +190,7 @@ public class MainActivity extends FragmentActivity
                 if (result.size() == 0) {
 					noMoreDeals = true;
 				}
+                unlockScreenOrientation();
             }
 
             @Override
@@ -190,6 +198,7 @@ public class MainActivity extends FragmentActivity
             	displayEmpty();
                 Log.e(TAG, cause.getMessage(), cause);
                 showToastMessage(R.string.failed_msg);
+                unlockScreenOrientation();
             }
 		});
 		
@@ -197,16 +206,47 @@ public class MainActivity extends FragmentActivity
 			
 			@Override
 		    public void onStartProgress() {
-		        progressDialog.show();
+				if (progressDialog != null) {
+					progressDialog.show();
+				}
+				showSplashScreen();
 		    }
 
 		    @Override
 		    public void onStopProgress() {
-		        progressDialog.dismiss();
+		    	if (progressDialog != null) {
+		    		progressDialog.dismiss();
+		    	}
+		    	removeSplashScreen();
 		    }
 		});	
 		
 		task.execute(GetDealsTask.createRequest(1, mSelectedCity, mSelectedCategories));
+		
+		lockScreenOrientation();
+	}
+	
+	protected void showSplashScreen() {
+	    mSplashDialog = new Dialog(this, R.style.SplashScreen);
+	    mSplashDialog.setContentView(R.layout.splash);
+	    mSplashDialog.setCancelable(false);
+	    mSplashDialog.show();
+	     
+	    // Set Runnable to remove splash screen just in case
+	    final Handler handler = new Handler();
+	    handler.postDelayed(new Runnable() {
+	      @Override
+	      public void run() {
+	        removeSplashScreen();
+	      }
+	    }, 3000);
+	}
+	
+	protected void removeSplashScreen() {
+	    if (mSplashDialog != null) {
+	        mSplashDialog.dismiss();
+	        mSplashDialog = null;
+	    }
 	}
 	
 	private void searchDeals(final String query, final int activeView) {
@@ -223,6 +263,7 @@ public class MainActivity extends FragmentActivity
 				if (result.size() == 0) {
 					noMoreDeals = true;
 				}
+				unlockScreenOrientation();
 			}
 			
 			@Override
@@ -230,6 +271,7 @@ public class MainActivity extends FragmentActivity
 				displayEmpty();
 				Log.e(TAG, cause.getMessage(), cause);
 				showToastMessage(R.string.failed_msg);
+				unlockScreenOrientation();
 			}
 		});
 		
@@ -237,16 +279,22 @@ public class MainActivity extends FragmentActivity
 			
 			@Override
 			public void onStartProgress() {
-				progressDialog.show();
+				if (progressDialog != null) {
+					progressDialog.show();
+				}
 			}
 			
 			@Override
 			public void onStopProgress() {
-				progressDialog.dismiss();
+				if (progressDialog != null) {
+					progressDialog.dismiss();
+				}
 			}
 		});
 		
 		task.execute(SearchDealsTask.createRequest(query, 1));
+		
+		lockScreenOrientation();
 	}
 	
 	private void displayDeals(ArrayList<Deal> results) {
@@ -301,6 +349,7 @@ public class MainActivity extends FragmentActivity
 					} else {
 						mDealsPage += 1;
 					}
+					unlockScreenOrientation();
 				}
 				
 				@Override
@@ -308,6 +357,7 @@ public class MainActivity extends FragmentActivity
 					isUpdating = false;
 					Log.e(TAG, cause.getMessage(), cause);
 					showToastMessage(R.string.failed_msg);
+					unlockScreenOrientation();
 				}
 			});
 			
@@ -315,12 +365,16 @@ public class MainActivity extends FragmentActivity
 				
 				@Override
 				public void onStartProgress() {
-					progressDialog.show();
+					if (progressDialog != null) {
+						progressDialog.show();
+					}
 				}
 				
 				@Override
 				public void onStopProgress() {
-					progressDialog.dismiss();
+					if (progressDialog != null) {
+						progressDialog.dismiss();
+					}
 				}
 			});
 			
@@ -338,6 +392,7 @@ public class MainActivity extends FragmentActivity
 					} else {
 						mDealsPage += 1;
 					}
+					unlockScreenOrientation();
 	            }
 
 	            @Override
@@ -345,6 +400,7 @@ public class MainActivity extends FragmentActivity
 	            	isUpdating = false;
 	                Log.e(TAG, cause.getMessage(), cause);
 	                showToastMessage(R.string.failed_msg);
+	                unlockScreenOrientation();
 	            }
 			});
 			
@@ -352,23 +408,42 @@ public class MainActivity extends FragmentActivity
 				
 				@Override
 			    public void onStartProgress() {
-			        progressDialog.show();
+					if (progressDialog != null) {
+						progressDialog.show();
+					}
 			    }
 
 			    @Override
 			    public void onStopProgress() {
-			        progressDialog.dismiss();
+			    	if (progressDialog != null) {
+			    		progressDialog.dismiss();
+			    	}
 			    }
 			});
 			
 			task.execute(GetDealsTask.createRequest(mDealsPage + 1, mSelectedCity, mSelectedCategories));
 		}
 		isUpdating = true;
+		lockScreenOrientation();
+	}
+	
+	private void lockScreenOrientation() {
+	    int currentOrientation = getResources().getConfiguration().orientation;
+	    if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+	        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	    } else {
+	        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	    }
+	}
+	 
+	private void unlockScreenOrientation() {
+	    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 	}
 	
 	private void updateDeals(ArrayList<Deal> deals) {
 		mDeals.addAll(deals);
 		mListFragment.updateDeals(mDeals);
+		//mListFragment.mAdapter.notifyDataSetChanged();
 		mMapFragment.updateDeals(mDeals);
 	}
 	
@@ -387,6 +462,7 @@ public class MainActivity extends FragmentActivity
 				if (result.size() == 0) {
 					noMoreDeals = true;
 				}
+				unlockScreenOrientation();
             }
 
             @Override
@@ -394,6 +470,7 @@ public class MainActivity extends FragmentActivity
             	noMoreDeals = true;
                 Log.e(TAG, cause.getMessage(), cause);
                 showToastMessage(R.string.failed_msg);
+                unlockScreenOrientation();
             }
 		});
 		
@@ -401,24 +478,30 @@ public class MainActivity extends FragmentActivity
 			
 			@Override
 		    public void onStartProgress() {
-		        progressDialog.show();
+				if (progressDialog != null) {
+					progressDialog.show();
+				}
 		    }
 
 		    @Override
 		    public void onStopProgress() {
-		        progressDialog.dismiss();
+		    	if (progressDialog != null) {
+		    		progressDialog.dismiss();
+		    	}
 		    }
 		});
 		
 		task.execute(GetDealsTask.createRequest(1, mSelectedCity, mSelectedCategories));
+		
+		lockScreenOrientation();
 	}
 	
 	private void refreshDeals(ArrayList<Deal> deals) {
 		mDeals.clear();
 		mDeals.addAll(deals);
 		mListFragment.updateDeals(mDeals);
-		mMapFragment.updateDeals(mDeals);
-		mMapFragment.reCenterMap(mSelectedCityLong, mSelectedCityLat, mSelectedCityMapZoom);
+		mMapFragment.updateDeals(mDeals, mSelectedCityLong, mSelectedCityLat, mSelectedCityMapZoom);
+		//mMapFragment.reCenterMap(mSelectedCityLong, mSelectedCityLat, mSelectedCityMapZoom);
 	}
 	
 	public void selectListOrMap(int currentPagerItem) {
@@ -450,9 +533,6 @@ public class MainActivity extends FragmentActivity
 	
 	public void onScrollUp() {
 		findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
-//		if (noMoreDeals) {
-//			noMoreDeals = false;
-//		}
 	}
 	
 	public void onScrollDown() {
@@ -473,16 +553,31 @@ public class MainActivity extends FragmentActivity
 	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_LAT", mSelectedCityLat);
 	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_MAPZOOM", mSelectedCityMapZoom);
 	  savedInstanceState.putIntegerArrayList("DEALS_SELECTED_CATEGORIES", mSelectedCategories);
+//	  if (mSplashDialog != null) {
+//		  savedInstanceState.putBoolean("SHOW_SPLASH_SCREEN", true);
+//	  } else {
+//		  
+//	  }
 	  super.onSaveInstanceState(savedInstanceState);
 	}
 	
 	@Override
-	public void startActivity(Intent intent) {      
+	public void startActivity(Intent intent) {
 	    // check if search intent
 	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 	        intent.putExtra("ACTIVE_VIEW_PAGE", mPager.getCurrentItem());
 	    }
 	    super.startActivity(intent);
+	}
+	
+	@Override
+	public void onPause() {
+	    super.onPause();
+
+	    if(progressDialog != null) {
+	    	progressDialog.dismiss();
+	    }
+	    progressDialog = null;
 	}
 	
 	@Override
@@ -499,6 +594,8 @@ public class MainActivity extends FragmentActivity
 		if (Utils.hasHoneycomb()) {
 			ActionBar actionBar = getActionBar();
 			actionBar.setDisplayHomeAsUpEnabled(true);
+			ImageView view = (ImageView)findViewById(android.R.id.home);
+			view.setPadding(getResources().getDimensionPixelSize(R.dimen.home_up_padding), 0, 0, 0);
 		}
 	}
 
@@ -549,6 +646,7 @@ public class MainActivity extends FragmentActivity
 		return true;
 	}
 	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
@@ -590,6 +688,10 @@ public class MainActivity extends FragmentActivity
 	}
 	
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (progressDialog == null) {
+            setProgressDialog();
+        }
+		
 		if (requestCode == 1) {
 			if(resultCode == RESULT_OK){      
 				onSettingsChanged();
@@ -602,7 +704,7 @@ public class MainActivity extends FragmentActivity
 	
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
-	 public boolean onSearchRequested() {
+	public boolean onSearchRequested() {
 		if (Utils.hasHoneycomb()) {
 			if (Utils.hasIceCreamSandwich()) {
 				mSearchMenuItem.expandActionView();
@@ -614,7 +716,7 @@ public class MainActivity extends FragmentActivity
 			super.onSearchRequested();
 			return true;
 		}
-	 }
+	}
 	
 	private void setProgressDialog() {
     	this.progressDialog = new ProgressDialog(this);
@@ -662,7 +764,6 @@ public class MainActivity extends FragmentActivity
 	        		return mListFragment;
 	        	default:
 	        		if (mMapFragment == null) {
-	        			Log.d(TAG, "Long: " + mSelectedCityLong + ", Lat: " + mSelectedCityLat + ", Zoom: " + mSelectedCityMapZoom);
 	        			mMapFragment = DealsMapFragment.newInstance(mDeals, mSelectedCityLong, mSelectedCityLat, mSelectedCityMapZoom);
 	        		}
 	        		return mMapFragment;

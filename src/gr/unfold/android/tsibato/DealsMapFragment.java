@@ -185,9 +185,38 @@ public class DealsMapFragment extends SupportMapFragment
 		}
 	}
 	
+	private void updateMap(double mapLong, double mapLat, double mapZoom) {
+		// Do a null check to confirm that we have not already instantiated the map.
+		mMap = this.getMap();
+		mSelectedCityLong = mapLong;
+		mSelectedCityLat = mapLat;
+		mSelectedCityMapZoom = mapZoom;
+		// Check if we were successful in obtaining the map.
+		if (mMap != null) {
+			mMap.clear();
+			mMarkers.clear();
+			for (Deal deal : mDeals) {
+	    		LatLng location = new LatLng(deal.lat, deal.lon);
+	    		Marker marker = mMap.addMarker(new MarkerOptions().position(location)
+	    						.title(deal.getSmallTitle(30))
+	    						.snippet(deal.getSmallTitle(50)));
+	    		
+	    		mMarkers.add(marker);
+	    	}
+			
+			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mapLat, mapLong), (float) mapZoom));
+		}
+	}
+	
 	public void updateDeals(ArrayList<Deal> deals) {
 		mDeals = deals;
 		updateMap();
+	}
+	
+	public void updateDeals(ArrayList<Deal> deals, double mapLong, double mapLat, double mapZoom) {
+		mDeals = deals;
+		updateMap(mapLong, mapLat, mapZoom);
+		//reCenterMap(mapLong, mapLat, mapZoom);
 	}
 	
 	public void reCenterMap(double mapLong, double mapLat, double mapZoom) {
