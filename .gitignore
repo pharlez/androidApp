@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+*.keystore
 *.pydevproject
 .project
 .metadata
