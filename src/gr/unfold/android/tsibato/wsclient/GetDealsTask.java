@@ -1,10 +1,13 @@
 package gr.unfold.android.tsibato.wsclient;
 
-import java.util.ArrayList;
-import java.util.List;
+import gr.unfold.android.tsibato.AppConfig;
+import gr.unfold.android.tsibato.async.AbstractAsyncTask;
+import gr.unfold.android.tsibato.data.Deal;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.SoapFault;
@@ -14,10 +17,6 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
 import android.util.Log;
-
-import gr.unfold.android.tsibato.BuildConfig;
-import gr.unfold.android.tsibato.async.AbstractAsyncTask;
-import gr.unfold.android.tsibato.data.Deal;
 
 public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>> {
 	
@@ -67,11 +66,7 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
         for (Integer i : providers){
         	soapProviders.addProperty("int", i);
         }
-        request.addSoapObject(soapProviders);        
-        
-        if (BuildConfig.DEBUG) {
-        	Log.d(TAG, "Feching deals page: " + page + "...");
-        }
+        request.addSoapObject(soapProviders);
         
         return request;
     }
@@ -86,14 +81,14 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
 
         // 3. Create a HTTP Transport object to send the web service request
         HttpTransportSE httpTransport = new HttpTransportSE(WSDL_URL);
-        if (BuildConfig.DEBUG) {
+        if (AppConfig.DEBUG) {
         	httpTransport.debug = true; // allows capture of raw request/response in Logcat
         }
         
         // 4. Make the web service invocation
         httpTransport.call(WS_NAMESPACE + WS_METHOD_NAME, envelope);
         
-        if (BuildConfig.DEBUG) {
+        if (AppConfig.DEBUG) {
         	Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
         	Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
         }
@@ -133,10 +128,6 @@ public class GetDealsTask extends AbstractAsyncTask<SoapObject, ArrayList<Deal>>
     					BigDecimal.valueOf(dealPrice).setScale(2, RoundingMode.HALF_UP), BigDecimal.valueOf(dealValue).setScale(2, RoundingMode.HALF_UP), 
     					BigDecimal.valueOf(dealDiscount).setScale(0, RoundingMode.HALF_UP), dealLong, dealLat, dealMapZoom));
     		}
-    	}
-    	
-    	if (BuildConfig.DEBUG) {
-    		Log.d(TAG, "Loaded " + result.size() + "results!");
     	}
     	
     	return result;

@@ -16,15 +16,12 @@
 
 package gr.unfold.android.tsibato.images;
 
+import gr.unfold.android.tsibato.AppConfig;
+import gr.unfold.android.tsibato.drawable.RecyclingBitmapDrawable;
+import gr.unfold.android.tsibato.util.Utils;
+
 import java.lang.ref.WeakReference;
 
-import gr.unfold.android.tsibato.BuildConfig;
-import gr.unfold.android.tsibato.images.ImageCache;
-import gr.unfold.android.tsibato.util.Utils;
-import gr.unfold.android.tsibato.drawable.RecyclingBitmapDrawable;
-
-import android.os.AsyncTask;
-import android.os.Build;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -34,6 +31,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.ImageView;
@@ -127,7 +125,7 @@ public abstract class ImageWorker {
            final Object bitmapData = bitmapWorkerTask.data;
            if (bitmapData == null || !bitmapData.equals(data)) {
                bitmapWorkerTask.cancel(true);
-               if (BuildConfig.DEBUG) {
+               if (AppConfig.DEBUG) {
                    Log.d(TAG, "cancelPotentialWork - cancelled work for " + data);
                }
            } else {
@@ -161,7 +159,7 @@ public abstract class ImageWorker {
 	   
 	   @Override
 	   protected BitmapDrawable doInBackground(Object... params) {
-		   if (BuildConfig.DEBUG) {
+		   if (AppConfig.DEBUG) {
                Log.d(TAG, "doInBackground - starting work");
            }
 		   
@@ -203,7 +201,7 @@ public abstract class ImageWorker {
 			   }
 		   }
 		   
-		   if (BuildConfig.DEBUG) {
+		   if (AppConfig.DEBUG) {
                Log.d(TAG, "doInBackground - finished work");
            }
 
@@ -219,7 +217,7 @@ public abstract class ImageWorker {
 
            final ImageView imageView = getAttachedImageView();
            if (value != null && imageView != null) {
-               if (BuildConfig.DEBUG) {
+               if (AppConfig.DEBUG) {
                    Log.d(TAG, "onPostExecute - setting bitmap");
                }
                setImageDrawable(imageView, value);

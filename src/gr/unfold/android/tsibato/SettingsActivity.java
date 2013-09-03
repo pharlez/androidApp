@@ -16,6 +16,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,9 +61,13 @@ public class SettingsActivity extends Activity implements OnClickListener {
         if (savedInstanceState != null) {
         	mCities = savedInstanceState.getParcelableArrayList("SETTINGS_CITIES");
         	mCategories = savedInstanceState.getParcelableArrayList("SETTINGS_CATEGORIES");
-        	setCities();
-        	setCategories();
-        	return;
+        	
+        	if (mCities != null && mCategories != null) {
+        		setCities();
+        		setCategories();
+        		
+        		return;
+        	}
         }
         
         getCities();
@@ -97,7 +103,7 @@ public class SettingsActivity extends Activity implements OnClickListener {
         	totalItemsChecked += 1;
         }
         CheckBox cb = (CheckBox) findViewById(R.id.categorySelectAllCheck);
-        TextView selectAllTextView = (TextView) findViewById(R.id.categorySelectAllTitle);			
+        //TextView selectAllTextView = (TextView) findViewById(R.id.categorySelectAllTitle);			
         if (totalItemsChecked == mCategories.size()) {
         	cb.setChecked(true);
         } else if (totalItemsChecked == 0) {
@@ -115,12 +121,16 @@ public class SettingsActivity extends Activity implements OnClickListener {
             public void onTaskCompleteSuccess(ArrayList<City> result) {
 				mCities = result;
 				setCities();
+				unlockScreenOrientation();
             }
 
             @Override
             public void onTaskFailed(Exception cause) {
-                Log.e(TAG, cause.getMessage(), cause);
+            	if (AppConfig.DEBUG) {
+            		Log.e(TAG, cause.getMessage(), cause);
+            	}
                 showToastMessage(R.string.failed_msg);
+                unlockScreenOrientation();
             }
 		});
 		
@@ -128,20 +138,24 @@ public class SettingsActivity extends Activity implements OnClickListener {
 			
 			@Override
 		    public void onStartProgress() {
-		        progressDialog.show();
+				if (progressDialog != null) {
+					progressDialog.show();
+				}
 		        asyncCitiesRunning = true;
 		    }
 
 		    @Override
 		    public void onStopProgress() {
 		    	asyncCitiesRunning = false;
-		    	if (!asyncCategoriesRunning) {
+		    	if (!asyncCategoriesRunning && progressDialog != null) {
 		    		progressDialog.dismiss();
 		    	}
 		    }
 		});
 		
 		task.execute(GetCitiesTask.createRequest());
+		
+		lockScreenOrientation();
 	}
 	
 	private void getCategories() {
@@ -153,12 +167,16 @@ public class SettingsActivity extends Activity implements OnClickListener {
             public void onTaskCompleteSuccess(ArrayList<Category> result) {
 				mCategories = result;
 				setCategories();
+				unlockScreenOrientation();
             }
 
             @Override
             public void onTaskFailed(Exception cause) {
-                Log.e(TAG, cause.getMessage(), cause);
+            	if (AppConfig.DEBUG) {
+            		Log.e(TAG, cause.getMessage(), cause);
+            	}
                 showToastMessage(R.string.failed_msg);
+                unlockScreenOrientation();
             }
 		});
 		
@@ -166,20 +184,24 @@ public class SettingsActivity extends Activity implements OnClickListener {
 			
 			@Override
 		    public void onStartProgress() {
-		        progressDialog.show();
+				if (progressDialog != null) {
+					progressDialog.show();
+				}
 		        asyncCategoriesRunning = true;
 		    }
 
 		    @Override
 		    public void onStopProgress() {
 		    	asyncCategoriesRunning = false;
-		    	if (!asyncCitiesRunning) {
+		    	if (!asyncCitiesRunning && progressDialog != null) {
 		    		progressDialog.dismiss();
 		    	}
 		    }
 		});
 		
 		task.execute(GetCategoriesTask.createRequest());
+		
+		lockScreenOrientation();
 	}
 	
 	private void saveSelectedCity() {
@@ -218,6 +240,19 @@ public class SettingsActivity extends Activity implements OnClickListener {
 		for(int i=0; i < listView.getAdapter().getCount(); i++){
 			listView.setItemChecked(i, false);
 		}
+	}
+	
+	private void lockScreenOrientation() {
+	    int currentOrientation = getResources().getConfiguration().orientation;
+	    if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+	        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	    } else {
+	        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	    }
+	}
+	 
+	private void unlockScreenOrientation() {
+	    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 	}
 	
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -266,6 +301,16 @@ public class SettingsActivity extends Activity implements OnClickListener {
 				finish();
 				break;
 		}
+	}
+	
+	@Override
+	public void onPause() {
+	    super.onPause();
+
+	    if(progressDialog != null) {
+	    	progressDialog.dismiss();
+	    }
+	    progressDialog = null;
 	}
 	
 	@Override

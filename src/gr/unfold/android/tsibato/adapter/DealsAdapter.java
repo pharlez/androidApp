@@ -1,5 +1,10 @@
 package gr.unfold.android.tsibato.adapter;
 
+import gr.unfold.android.tsibato.R;
+import gr.unfold.android.tsibato.data.Deal;
+import gr.unfold.android.tsibato.images.ImageFetcher;
+import gr.unfold.android.tsibato.views.RecyclingImageView;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -12,11 +17,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import gr.unfold.android.tsibato.R;
-import gr.unfold.android.tsibato.data.Deal;
-import gr.unfold.android.tsibato.images.ImageFetcher;
-import gr.unfold.android.tsibato.views.RecyclingImageView;
 
 public class DealsAdapter extends ArrayAdapter<Deal> {
 	

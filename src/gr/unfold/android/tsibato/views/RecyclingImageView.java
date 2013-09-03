@@ -1,7 +1,6 @@
 package gr.unfold.android.tsibato.views;
 
 import gr.unfold.android.tsibato.drawable.RecyclingBitmapDrawable;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;

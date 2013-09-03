@@ -111,7 +111,7 @@
 	<TextView
         android:id="@+id/dealtitle"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/dealimage"
         android:layout_above="@id/dealActions"        
         android:layout_marginTop="20dp"
@@ -119,7 +119,7 @@
         android:layout_marginRight="25dp"
         android:textColor="#555555"
         android:textIsSelectable="true"
-        android:textSize="11.5sp"
+        android:textSize="13sp"
         tools:ignore="SmallSp"/>
     
 </RelativeLayout>

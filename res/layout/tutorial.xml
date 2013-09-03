@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#aa000000" >
+    
+    <ImageView
+        android:id="@+id/settings_btn_overlay" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        style="@style/ActionSettingsOverlay"
+        android:src="@drawable/ic_menu_settings"/>
+    
+    <RelativeLayout 
+        android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_below="@id/settings_btn_overlay"
+		android:layout_marginRight="20dp" >
+    
+	    <ImageView
+	        android:id="@+id/tutorialLogo"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:src="@drawable/tutorial_popup" />
+	    
+	    <Button
+	        android:id="@+id/tutorial_gotit"
+	        android:layout_width="75dp"
+	        android:layout_height="30dp"
+	        android:layout_alignBottom="@id/tutorialLogo"
+	        android:layout_marginBottom="27dp"
+	        android:layout_marginLeft="82dp"
+	        android:background="@drawable/gotit_state"
+	        android:textColor="#015177"
+	        android:textSize="20dp"
+	        android:textStyle="bold"
+	        android:text="@string/tutorial_ok" />
+    
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -1,8 +1,6 @@
 package gr.unfold.android.tsibato.async;
 
-import gr.unfold.android.tsibato.async.AsyncTaskListener;
-import gr.unfold.android.tsibato.async.IProgressTracker;
-
+import gr.unfold.android.tsibato.AppConfig;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -46,7 +44,9 @@ public abstract class AbstractAsyncTask<T, R> extends AsyncTask<T, Void, R> {
         try {
             result = executeTask(parameters[0]);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to invoke the web service: ", e);
+        	if (AppConfig.DEBUG) {
+        		Log.e(TAG, "Failed to invoke the web service: ", e);
+        	}
             mostRecentException = e;
         }
 

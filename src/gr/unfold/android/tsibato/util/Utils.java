@@ -1,10 +1,9 @@
 package gr.unfold.android.tsibato.util;
 
+import gr.unfold.android.tsibato.MainActivity;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.StrictMode;
-
-import gr.unfold.android.tsibato.MainActivity;
 
 public class Utils {
 	private Utils() {};

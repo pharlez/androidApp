@@ -1,5 +1,9 @@
 package gr.unfold.android.tsibato.wsclient;
 
+import gr.unfold.android.tsibato.AppConfig;
+import gr.unfold.android.tsibato.async.AbstractAsyncTask;
+import gr.unfold.android.tsibato.data.Category;
+
 import java.util.ArrayList;
 
 import org.ksoap2.SoapEnvelope;
@@ -9,10 +13,6 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
 import android.util.Log;
-
-import gr.unfold.android.tsibato.BuildConfig;
-import gr.unfold.android.tsibato.async.AbstractAsyncTask;
-import gr.unfold.android.tsibato.data.Category;
 
 public class GetCategoriesTask extends AbstractAsyncTask<SoapObject, ArrayList<Category>> {
 	
@@ -40,14 +40,14 @@ public class GetCategoriesTask extends AbstractAsyncTask<SoapObject, ArrayList<C
 
         // 3. Create a HTTP Transport object to send the web service request
         HttpTransportSE httpTransport = new HttpTransportSE(WSDL_URL);
-        if (BuildConfig.DEBUG) {
+        if (AppConfig.DEBUG) {
         	httpTransport.debug = true; // allows capture of raw request/response in Logcat
         }
 
         // 4. Make the web service invocation
         httpTransport.call(WS_NAMESPACE + WS_METHOD_NAME, envelope);
 
-        if (BuildConfig.DEBUG) {
+        if (AppConfig.DEBUG) {
         	Log.d(TAG, "HTTP REQUEST:\n" + httpTransport.requestDump);
         	Log.d(TAG, "HTTP RESPONSE:\n" + httpTransport.responseDump);
         }

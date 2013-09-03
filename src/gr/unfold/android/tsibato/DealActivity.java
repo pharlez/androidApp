@@ -1,18 +1,16 @@
 package gr.unfold.android.tsibato;
 
+import gr.unfold.android.tsibato.data.Deal;
+import gr.unfold.android.tsibato.images.ImageCache.ImageCacheParams;
+import gr.unfold.android.tsibato.images.ImageFetcher;
+import gr.unfold.android.tsibato.util.Utils;
+import gr.unfold.android.tsibato.views.RecyclingImageView;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import gr.unfold.android.tsibato.data.Deal;
-import gr.unfold.android.tsibato.images.ImageFetcher;
-import gr.unfold.android.tsibato.images.ImageCache.ImageCacheParams;
-import gr.unfold.android.tsibato.util.Utils;
-import gr.unfold.android.tsibato.views.RecyclingImageView;
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -31,13 +29,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
-import android.widget.SearchView.OnQueryTextListener;
-import android.widget.SearchView.OnSuggestionListener;
 
 public class DealActivity extends FragmentActivity {
 	private static final String TAG = "DealActivity";
@@ -55,10 +49,10 @@ public class DealActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if (Utils.hasHoneycomb()) {
-			ImageView view = (ImageView)findViewById(android.R.id.home);
-			view.setPadding(getResources().getDimensionPixelSize(R.dimen.action_bar_up_padding), 0, 0, 0);
-		}
+//		if (Utils.hasHoneycomb()) {
+//			ImageView view = (ImageView)findViewById(android.R.id.home);
+//			view.setPadding(getResources().getDimensionPixelSize(R.dimen.action_bar_up_padding), 0, 0, 0);
+//		}
 		
 		mImageHeight = getResources().getDimensionPixelSize(R.dimen.image_large_height);
 		mImageWidth = getResources().getDimensionPixelSize(R.dimen.image_large_width);

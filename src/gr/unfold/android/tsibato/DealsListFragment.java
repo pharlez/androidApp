@@ -1,30 +1,21 @@
 package gr.unfold.android.tsibato;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.Activity;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ListView;
-
-import gr.unfold.android.tsibato.images.ImageFetcher;
+import gr.unfold.android.tsibato.adapter.DealsAdapter;
+import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.images.ImageCache.ImageCacheParams;
+import gr.unfold.android.tsibato.images.ImageFetcher;
 import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
 import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
 import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
-import gr.unfold.android.tsibato.util.Utils;
-import gr.unfold.android.tsibato.adapter.DealsAdapter;
-import gr.unfold.android.tsibato.data.Deal;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.ListFragment;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 public class DealsListFragment extends ListFragment {
 	private static final String TAG = "DealsListFragment";
@@ -84,11 +75,7 @@ public class DealsListFragment extends ListFragment {
         	mPosition = savedInstanceState.getInt("LIST_POSITION");
         	mOffset = savedInstanceState.getInt("LIST_OFFSET");
         }
-        
-        Log.d(TAG, "On Create, ListFragment: " + this.toString());
-		Log.d(TAG, "On Create, Adapter: " + mAdapter.toString());
 		
-		//setListAdapter(mAdapter);
 	}
 	
 	@Override
@@ -210,8 +197,6 @@ public class DealsListFragment extends ListFragment {
 	
 	public void updateDeals(ArrayList<Deal> deals) {
 		mDeals = deals;
-		Log.d(TAG, "On Update, ListFragment: " + this.toString());
-		Log.d(TAG, "On Update, Adapter: " + mAdapter.toString());
 		mAdapter.notifyDataSetChanged();
 	}
 	

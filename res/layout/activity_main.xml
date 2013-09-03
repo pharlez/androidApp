@@ -14,29 +14,67 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     
-   	<LinearLayout
+   	<RelativeLayout
         android:id="@+id/toolbar"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="54dp"
         android:layout_alignParentBottom="true"
-        android:gravity="center"
         android:clickable="true"
         android:background="@drawable/toolbar_background" >
+        
+   	    <LinearLayout
+   	        android:id="@+id/deals_count"
+   	        android:layout_width="80dp"
+   	        android:layout_height="wrap_content"
+   	        android:layout_alignParentLeft="true"
+   	        android:layout_marginLeft="12dp"
+   	        android:layout_marginRight="30dp"
+   	        android:layout_centerVertical="true"
+   	        android:orientation="vertical" >
+   	        
+   	        <TextView
+	   	        android:id="@+id/deals_count_first"
+	   	        android:layout_width="match_parent"
+	   	        android:layout_height="wrap_content"
+	   	        android:text="@string/count_first"
+	   	        android:textColor="#b0adad"
+	   	        android:textSize="11dp"
+	   	        android:textStyle="bold"
+	   	        android:includeFontPadding="false"
+	   	        android:visibility="gone" />
+   	        
+	   	    <TextView
+	   	        android:id="@+id/deals_count_second"
+	   	        android:layout_width="match_parent"
+	   	        android:layout_height="wrap_content"
+	   	        android:textColor="#ffffff"
+	   	        android:textSize="11dp"
+	   	        android:includeFontPadding="false" />
+   	    
+   	    </LinearLayout>
+   	    
+		<LinearLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:orientation="horizontal"
+		    android:layout_centerInParent="true" >
 		
-   	    <Button
-   	        android:id="@+id/button_list"
-   	        android:layout_width="55dp"
-   	        android:layout_height="35dp"
-   	        android:background="@drawable/list_btn_state" />
+	   	    <Button
+	   	        android:id="@+id/button_list"
+	   	        android:layout_width="55dp"
+	   	        android:layout_height="35dp"
+	   	        android:background="@drawable/list_btn_state" />
+	   	    
+	   	    <Button
+	   	        android:id="@+id/button_map"
+	   	        android:layout_width="55dp"
+	   	        android:layout_height="35dp"
+	   	        android:background="@drawable/map_btn_state" />
    	    
-   	    <Button
-   	        android:id="@+id/button_map"
-   	        android:layout_width="55dp"
-   	        android:layout_height="35dp"
-   	        android:background="@drawable/map_btn_state" />
+   	    </LinearLayout>
    	    
-    </LinearLayout>
+    </RelativeLayout>
     
   	<LinearLayout
   	    android:id="@+id/empty"

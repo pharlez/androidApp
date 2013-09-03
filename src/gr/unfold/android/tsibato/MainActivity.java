@@ -1,8 +1,32 @@
 package gr.unfold.android.tsibato;
 
+import gr.unfold.android.tsibato.async.AsyncTaskListener;
+import gr.unfold.android.tsibato.async.IProgressTracker;
+import gr.unfold.android.tsibato.data.Deal;
+import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
+import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
+import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
+import gr.unfold.android.tsibato.search.DealSuggestionsProvider;
+import gr.unfold.android.tsibato.util.StyleableSpannableStringBuilder;
+import gr.unfold.android.tsibato.util.Utils;
+import gr.unfold.android.tsibato.views.ViewPagerNonSwipeable;
+import gr.unfold.android.tsibato.wsclient.GetDealsCountTask;
+import gr.unfold.android.tsibato.wsclient.GetDealsTask;
+import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
+
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import android.annotation.TargetApi;
+import android.app.ActionBar;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,44 +35,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SearchView.OnSuggestionListener;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.util.Log;
-
-import gr.unfold.android.tsibato.async.AsyncTaskListener;
-import gr.unfold.android.tsibato.async.IProgressTracker;
-import gr.unfold.android.tsibato.data.Deal;
-import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
-import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
-import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
-import gr.unfold.android.tsibato.views.ViewPagerNonSwipeable;
-import gr.unfold.android.tsibato.wsclient.GetDealsTask;
-import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
-import gr.unfold.android.tsibato.search.DealSuggestionsProvider;
-import gr.unfold.android.tsibato.util.Utils;
 
 public class MainActivity extends FragmentActivity
 		implements OnDealSelectedListener, OnScrollUpOrDownListener, OnDealsChangedListener {
@@ -76,6 +74,8 @@ public class MainActivity extends FragmentActivity
 	
 	private boolean isUpdating;
 	private boolean noMoreDeals;
+	
+	private int mDealsCount;
 	
 	public int mDealsPage;
 	
@@ -117,6 +117,8 @@ public class MainActivity extends FragmentActivity
             	mDeals = savedInstanceState.getParcelableArrayList("DEALS_PARCEL_ARRAY");
 	            mQuery = savedInstanceState.getString("SEARCH_QUERY");
 	            mDealsPage = savedInstanceState.getInt("DEALS_PAGE_LOADED");
+	            mDealsCount = savedInstanceState.getInt("DEALS_COUNT");
+	            noMoreDeals = savedInstanceState.getBoolean("NO_MORE_DEALS");
 	            mSelectedCity = savedInstanceState.getInt("DEALS_SELECTED_CITY");
 	            mSelectedCityLong = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LONG");
 	            mSelectedCityLat = savedInstanceState.getDouble("DEALS_SELECTED_CITY_LAT");
@@ -130,6 +132,8 @@ public class MainActivity extends FragmentActivity
 	            	int activeViewPage = savedInstanceState.getInt("ACTIVE_VIEW_PAGE");
 	            	mPager.setCurrentItem(activeViewPage);
 	            	selectListOrMap(activeViewPage);
+	            	
+	            	setDealsCount();
 	            	
 	            	return;
             	}
@@ -153,8 +157,11 @@ public class MainActivity extends FragmentActivity
                 
                 setHomeOnSearch();
                 
+                findViewById(R.id.deals_count).setVisibility(View.GONE);
+                
             } else {
-            	getDeals();
+            	getDeals(true);
+            	getDealsCount();
             }
         }
 	}
@@ -174,10 +181,9 @@ public class MainActivity extends FragmentActivity
         	int categoryId = Integer.parseInt(strToken.nextToken());
         	mSelectedCategories.add(categoryId);
         }
-        Log.d(TAG, "Selected categories: " + mSelectedCategories.toString());
 	}
 	
-	private void getDeals() {
+	private void getDeals(final boolean showSplash) {
 		GetDealsTask task = new GetDealsTask();
 		
 		task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
@@ -190,13 +196,18 @@ public class MainActivity extends FragmentActivity
                 if (result.size() == 0) {
 					noMoreDeals = true;
 				}
+                setDealsCount();
                 unlockScreenOrientation();
+                
+                showTutorial();
             }
 
             @Override
             public void onTaskFailed(Exception cause) {
             	displayEmpty();
-                Log.e(TAG, cause.getMessage(), cause);
+            	if (AppConfig.DEBUG) {
+            		Log.e(TAG, cause.getMessage(), cause);
+            	}
                 showToastMessage(R.string.failed_msg);
                 unlockScreenOrientation();
             }
@@ -209,7 +220,9 @@ public class MainActivity extends FragmentActivity
 				if (progressDialog != null) {
 					progressDialog.show();
 				}
-				showSplashScreen();
+				if (showSplash) {
+					showSplashScreen();
+				}
 		    }
 
 		    @Override
@@ -217,13 +230,68 @@ public class MainActivity extends FragmentActivity
 		    	if (progressDialog != null) {
 		    		progressDialog.dismiss();
 		    	}
-		    	removeSplashScreen();
+		    	if (showSplash) {
+		    		removeSplashScreen();
+		    	}
 		    }
 		});	
 		
 		task.execute(GetDealsTask.createRequest(1, mSelectedCity, mSelectedCategories));
 		
 		lockScreenOrientation();
+	}
+	
+	private void showTutorial() {
+		SharedPreferences prefs = getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE);
+		boolean tutorialCompleted = prefs.getBoolean("TUTORIAL_COMPLETED", false);
+		if (!tutorialCompleted && Utils.hasHoneycomb()) {
+			Intent tutorialIntent = new Intent(this, TutorialActivity.class);
+    		startActivityForResult(tutorialIntent, 2);
+		}
+	}
+	
+	private void getDealsCount() {
+		GetDealsCountTask task = new GetDealsCountTask();
+		
+		task.setTaskListener(new AsyncTaskListener<String>() {
+
+			@Override
+            public void onTaskCompleteSuccess(String result) {
+				try {
+					mDealsCount = Integer.parseInt(result);
+					setDealsCount();
+				} catch (Exception ex) {
+				}
+            }
+
+            @Override
+            public void onTaskFailed(Exception cause) {
+            	if (AppConfig.DEBUG) {
+            		Log.e(TAG, cause.getMessage(), cause);
+            	}
+                showToastMessage(R.string.failed_msg);
+            }
+		});
+		
+		task.execute();
+	}
+	
+	protected void setDealsCount() {
+		if (mDeals != null && mDealsCount > 0) {
+			StyleableSpannableStringBuilder stringBuilder = new StyleableSpannableStringBuilder();
+			
+			stringBuilder.appendBold(Integer.toString(mDeals.size()));
+			stringBuilder.append(" " + getString(R.string.from_value) + " ");
+			stringBuilder.appendBold(Integer.toString(mDealsCount));
+			stringBuilder.append(" " + getString(R.string.deals_text));
+			
+			findViewById(R.id.deals_count_first).setVisibility(View.VISIBLE);
+			
+			TextView v = (TextView) findViewById(R.id.deals_count_second);
+			v.setText(stringBuilder, TextView.BufferType.SPANNABLE);
+		} else {
+			findViewById(R.id.deals_count_first).setVisibility(View.GONE);
+		}
 	}
 	
 	protected void showSplashScreen() {
@@ -269,7 +337,9 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTaskFailed(Exception cause) {
 				displayEmpty();
-				Log.e(TAG, cause.getMessage(), cause);
+				if (AppConfig.DEBUG) {
+					Log.e(TAG, cause.getMessage(), cause);
+				}
 				showToastMessage(R.string.failed_msg);
 				unlockScreenOrientation();
 			}
@@ -329,7 +399,7 @@ public class MainActivity extends FragmentActivity
 		if (mQuery != null) {
 			searchDeals(mQuery, 0);
 		} else {
-			getDeals();
+			getDeals(false);
 		}		
 	}
 	
@@ -355,7 +425,9 @@ public class MainActivity extends FragmentActivity
 				@Override
 				public void onTaskFailed(Exception cause) {
 					isUpdating = false;
-					Log.e(TAG, cause.getMessage(), cause);
+					if (AppConfig.DEBUG) {
+						Log.e(TAG, cause.getMessage(), cause);
+					}
 					showToastMessage(R.string.failed_msg);
 					unlockScreenOrientation();
 				}
@@ -392,13 +464,16 @@ public class MainActivity extends FragmentActivity
 					} else {
 						mDealsPage += 1;
 					}
+					setDealsCount();
 					unlockScreenOrientation();
 	            }
 
 	            @Override
 	            public void onTaskFailed(Exception cause) {
 	            	isUpdating = false;
-	                Log.e(TAG, cause.getMessage(), cause);
+	            	if (AppConfig.DEBUG) {
+	            		Log.e(TAG, cause.getMessage(), cause);
+	            	}
 	                showToastMessage(R.string.failed_msg);
 	                unlockScreenOrientation();
 	            }
@@ -462,13 +537,16 @@ public class MainActivity extends FragmentActivity
 				if (result.size() == 0) {
 					noMoreDeals = true;
 				}
+				setDealsCount();
 				unlockScreenOrientation();
             }
 
             @Override
             public void onTaskFailed(Exception cause) {
             	noMoreDeals = true;
-                Log.e(TAG, cause.getMessage(), cause);
+            	if (AppConfig.DEBUG) {
+            		Log.e(TAG, cause.getMessage(), cause);
+            	}
                 showToastMessage(R.string.failed_msg);
                 unlockScreenOrientation();
             }
@@ -553,6 +631,8 @@ public class MainActivity extends FragmentActivity
 	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_LAT", mSelectedCityLat);
 	  savedInstanceState.putDouble("DEALS_SELECTED_CITY_MAPZOOM", mSelectedCityMapZoom);
 	  savedInstanceState.putIntegerArrayList("DEALS_SELECTED_CATEGORIES", mSelectedCategories);
+	  savedInstanceState.putInt("DEALS_COUNT", mDealsCount);
+      savedInstanceState.putBoolean("NO_MORE_DEALS", noMoreDeals);
 //	  if (mSplashDialog != null) {
 //		  savedInstanceState.putBoolean("SHOW_SPLASH_SCREEN", true);
 //	  } else {
@@ -594,8 +674,8 @@ public class MainActivity extends FragmentActivity
 		if (Utils.hasHoneycomb()) {
 			ActionBar actionBar = getActionBar();
 			actionBar.setDisplayHomeAsUpEnabled(true);
-			ImageView view = (ImageView)findViewById(android.R.id.home);
-			view.setPadding(getResources().getDimensionPixelSize(R.dimen.home_up_padding), 0, 0, 0);
+//			ImageView view = (ImageView)findViewById(android.R.id.home);
+//			view.setPadding(getResources().getDimensionPixelSize(R.dimen.home_up_padding), 0, 0, 0);
 		}
 	}
 
@@ -699,6 +779,11 @@ public class MainActivity extends FragmentActivity
 		    if (resultCode == RESULT_CANCELED) {    
 		    	//Write your code if there's no result
 		    }
+		} else if (requestCode == 2) {
+			getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE)
+				.edit()
+				.putBoolean("TUTORIAL_COMPLETED", true)
+				.commit();
 		}
 	}
 	
@@ -722,7 +807,7 @@ public class MainActivity extends FragmentActivity
     	this.progressDialog = new ProgressDialog(this);
         this.progressDialog.setCancelable(false);
         this.progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        this.progressDialog.setMessage(getString(R.string.loading_deals_msg));
+        this.progressDialog.setMessage(getString(R.string.loading_msg));
     }
 	
 	private void showToastMessage(int messageId) {

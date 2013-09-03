@@ -16,11 +16,10 @@
 
 package gr.unfold.android.tsibato.images;
 
-import java.io.FileDescriptor;
-
-import gr.unfold.android.tsibato.BuildConfig;
-import gr.unfold.android.tsibato.images.ImageCache;
+import gr.unfold.android.tsibato.AppConfig;
 import gr.unfold.android.tsibato.util.Utils;
+
+import java.io.FileDescriptor;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -46,7 +45,7 @@ public class ImageResizer extends ImageWorker {
     }
     
     private Bitmap processBitmap(int resId) {
-        if (BuildConfig.DEBUG) {
+        if (AppConfig.DEBUG) {
             Log.d(TAG, "processBitmap - " + resId);
         }
         return decodeSampledBitmapFromResource(mResources, resId, mImageWidth,
@@ -112,7 +111,7 @@ public class ImageResizer extends ImageWorker {
             Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
 
             if (inBitmap != null) {
-                if (BuildConfig.DEBUG) {
+                if (AppConfig.DEBUG) {
                     Log.d(TAG, "Found bitmap to use for inBitmap");
                 }
                 options.inBitmap = inBitmap;

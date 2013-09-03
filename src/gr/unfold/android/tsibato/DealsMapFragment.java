@@ -3,15 +3,17 @@ package gr.unfold.android.tsibato;
 import gr.unfold.android.tsibato.data.Deal;
 import gr.unfold.android.tsibato.listeners.OnDealSelectedListener;
 import gr.unfold.android.tsibato.listeners.OnDealsChangedListener;
-import gr.unfold.android.tsibato.listeners.OnScrollUpOrDownListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Parcel;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,8 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -42,11 +46,13 @@ public class DealsMapFragment extends SupportMapFragment
 	private ArrayList<Marker> mMarkers;
 	
 	private ArrayList<Deal> mDeals;
-	private String mQuery;
 	
 	private double mSelectedCityLong;
 	private double mSelectedCityLat;
 	private double mSelectedCityMapZoom;
+	
+	private LocationManager mLocationManager;
+	private LocationListener mLocationListener;
 	
 	public DealsMapFragment() {	}
 	
@@ -64,12 +70,11 @@ public class DealsMapFragment extends SupportMapFragment
 		return mapFragment;
 	}
 	
-	public static DealsMapFragment newInstance(ArrayList<Deal> deals, String query) {
+	public static DealsMapFragment newInstance(ArrayList<Deal> deals) {
 		DealsMapFragment mapFragment = new DealsMapFragment();
 		
 		Bundle bundle = new Bundle();
 		bundle.putParcelableArrayList("DEALS_PARCEL_ARRAY", deals);
-		bundle.putString("SEARCH_QUERY", query);
 		
 		mapFragment.setArguments(bundle);
 		
@@ -86,10 +91,6 @@ public class DealsMapFragment extends SupportMapFragment
 			mSelectedCityLong = bundle.getDouble("SELECTED_CITY_LONG");
 			mSelectedCityLat = bundle.getDouble("SELECTED_CITY_LAT");
 			mSelectedCityMapZoom = bundle.getDouble("SELECTED_CITY_MAPZOOM");
-			String query = bundle.getString("SEARCH_QUERY");
-			if (query != null) {
-				mQuery = query;
-			}
 		}
 		
 	}
@@ -115,7 +116,7 @@ public class DealsMapFragment extends SupportMapFragment
 		if (savedInstanceState != null) {
 			savedInstanceState.setClassLoader(CameraPositionCreator.class.getClassLoader());
 			camPosition = (CameraPosition) savedInstanceState.getParcelable("MAP_CAMERA_POSITION");
-		} 
+		}
 		setUpMapIfNeeded(camPosition);
 	}
 	
@@ -124,7 +125,6 @@ public class DealsMapFragment extends SupportMapFragment
 		super.onResume();
 		
 		mUpdater.onDealsDataChanged(mDeals);
-		
 	}
 	
 	private void setUpMapIfNeeded(CameraPosition position) {
@@ -135,6 +135,7 @@ public class DealsMapFragment extends SupportMapFragment
             // The Map is verified. It is now safe to manipulate the map.
         	mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         	mMap.getUiSettings().setZoomControlsEnabled(false);
+        	mMap.setMyLocationEnabled(false);
         	
         	mMarkers = new ArrayList<Marker>();
         	LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -157,12 +158,8 @@ public class DealsMapFragment extends SupportMapFragment
 			if (position != null) {
 				mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
 			}
-//			else if (mMarkers.size() > 0) {
-//				LatLngBounds bounds = builder.build();
-//				mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 500, 500, 0));
-//			}
 			else {
-				mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mSelectedCityLat, mSelectedCityLong), (float) mSelectedCityMapZoom));
+				centerMap();
 			}
         }
 	}
@@ -204,7 +201,7 @@ public class DealsMapFragment extends SupportMapFragment
 	    		mMarkers.add(marker);
 	    	}
 			
-			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mapLat, mapLong), (float) mapZoom));
+			centerMap();
 		}
 	}
 	
@@ -219,12 +216,48 @@ public class DealsMapFragment extends SupportMapFragment
 		//reCenterMap(mapLong, mapLat, mapZoom);
 	}
 	
-	public void reCenterMap(double mapLong, double mapLat, double mapZoom) {
-		mSelectedCityLong = mapLong;
-		mSelectedCityLat = mapLat;
-		mSelectedCityMapZoom = mapZoom;
-		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mSelectedCityLat, mSelectedCityLong), (float) mSelectedCityMapZoom));
+	protected void centerMap() {
+		mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+		
+		mLocationListener = new LocationListener() {
+		    public void onLocationChanged(Location location) {
+		    	// Called when a new location is found by the network location provider.
+		    	LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
+				mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coordinate, (float) 12));
+				if (mLocationManager != null) {
+					mLocationManager.removeUpdates(mLocationListener);
+				}
+		    }
+
+		    public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+		    public void onProviderEnabled(String provider) {}
+
+		    public void onProviderDisabled(String provider) {}
+		};
+		
+		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
+		
+		final Handler handler = new Handler();
+	    handler.postDelayed(new Runnable() {
+	      @Override
+	      public void run() {
+	    	  if (mLocationManager != null) {
+	    		  mLocationManager.removeUpdates(mLocationListener);
+	    	  }
+	      }
+	    }, 3000);
+		
+		Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		
+		if (location != null) {
+			LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
+			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coordinate, (float) 12));
+		} else {
+			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mSelectedCityLat, mSelectedCityLong), (float) mSelectedCityMapZoom));			
+		}
 	}
+
 	
 	public void onInfoWindowClick(Marker marker) {
 		Deal deal = mDeals.get(mMarkers.indexOf(marker));
@@ -233,12 +266,14 @@ public class DealsMapFragment extends SupportMapFragment
 	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-	  // Save UI state changes to the savedInstanceState.
-	  // This bundle will be passed to onCreate if the process is
-	  // killed and restarted.
-	  savedInstanceState.setClassLoader(mMap.getCameraPosition().getClass().getClassLoader());
-	  savedInstanceState.putParcelable("MAP_CAMERA_POSITION", mMap.getCameraPosition());
-	  super.onSaveInstanceState(savedInstanceState);
+		// Save UI state changes to the savedInstanceState.
+		// This bundle will be passed to onCreate if the process is
+		// killed and restarted.
+		if (mMap != null) {	
+			savedInstanceState.setClassLoader(mMap.getCameraPosition().getClass().getClassLoader());
+			savedInstanceState.putParcelable("MAP_CAMERA_POSITION", mMap.getCameraPosition());
+		}
+		super.onSaveInstanceState(savedInstanceState);
 	}
 	
 	@Override
@@ -254,5 +289,27 @@ public class DealsMapFragment extends SupportMapFragment
                     + " must implement OnDealSelectedListener and OnDealsChangedListener");
         }
 	}
+	
+	private boolean servicesConnected() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity());
+        // If Google Play services is available
+        if (ConnectionResult.SUCCESS == resultCode) {
+            // In debug mode, log the status
+        	if (AppConfig.DEBUG) {
+        		Log.d("Location Updates", "Google Play services is available.");
+        	}
+            return true;
+        // Google Play services was not available for some reason
+        } else {
+            // Get the error dialog from Google Play services
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this.getActivity(), 0);
+            // If Google Play services can provide an error dialog
+            if (errorDialog != null) {
+                // Create a new DialogFragment for the error dialog
+                errorDialog.show();
+            }
+            return false;
+        }
+    }
 	
 }

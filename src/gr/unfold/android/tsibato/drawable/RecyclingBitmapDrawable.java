@@ -16,7 +16,7 @@
 
 package gr.unfold.android.tsibato.drawable;
 
-import gr.unfold.android.tsibato.BuildConfig;
+import gr.unfold.android.tsibato.AppConfig;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -67,7 +67,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
         // has been displayed, then recycle
         if (mCacheRefCount <= 0 && mDisplayRefCount <= 0 && mHasBeenDisplayed
                 && hasValidBitmap()) {
-            if (BuildConfig.DEBUG) {
+            if (AppConfig.DEBUG) {
                 Log.d(LOG_TAG, "No longer being used or cached so recycling. "
                         + toString());
             }
