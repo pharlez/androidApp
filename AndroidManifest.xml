@@ -8,7 +8,7 @@
     	android:name="gr.unfold.android.tsibato.permission.MAPS_RECEIVE"
     	android:protectionLevel="signature" />
 	<uses-permission android:name="gr.unfold.android.tsibato.permission.MAPS_RECEIVE"/>
-    
+	
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />

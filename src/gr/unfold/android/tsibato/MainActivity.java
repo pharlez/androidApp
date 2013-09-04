@@ -14,19 +14,28 @@ import gr.unfold.android.tsibato.wsclient.GetDealsCountTask;
 import gr.unfold.android.tsibato.wsclient.GetDealsTask;
 import gr.unfold.android.tsibato.wsclient.SearchDealsTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,6 +62,8 @@ public class MainActivity extends FragmentActivity
 	
 	private static final String TAG = MainActivity.class.getName();
 	private static final int NUM_ITEMS = 2;
+	private static final long DAY_MILLIS = 24 * 60 * 60 * 1000;
+	private static final String CURRENT_VERSION_URL = "http://www.unfold.gr/tsibato_version.txt";
 	
 	private ProgressDialog progressDialog;
 	private MenuItem mSearchMenuItem;
@@ -80,6 +91,7 @@ public class MainActivity extends FragmentActivity
 	public int mDealsPage;
 	
 	protected Dialog mSplashDialog;
+	private Handler mCheckUpdateHandler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +100,8 @@ public class MainActivity extends FragmentActivity
 		setContentView(R.layout.activity_main);
 		
 		setProgressDialog();
+		
+		mCheckUpdateHandler = new Handler();
 		
 		// Check that the activity is using the layout version with
         // the fragment_container FrameLayout
@@ -183,7 +197,7 @@ public class MainActivity extends FragmentActivity
         }
 	}
 	
-	private void getDeals(final boolean showSplash) {
+	private void getDeals(final boolean isStart) {
 		GetDealsTask task = new GetDealsTask();
 		
 		task.setTaskListener(new AsyncTaskListener<ArrayList<Deal>>() {
@@ -199,7 +213,10 @@ public class MainActivity extends FragmentActivity
                 setDealsCount();
                 unlockScreenOrientation();
                 
-                showTutorial();
+                if (isStart) {
+                	showTutorial();
+                	showUpdate();
+                }
             }
 
             @Override
@@ -220,7 +237,7 @@ public class MainActivity extends FragmentActivity
 				if (progressDialog != null) {
 					progressDialog.show();
 				}
-				if (showSplash) {
+				if (isStart) {
 					showSplashScreen();
 				}
 		    }
@@ -230,7 +247,7 @@ public class MainActivity extends FragmentActivity
 		    	if (progressDialog != null) {
 		    		progressDialog.dismiss();
 		    	}
-		    	if (showSplash) {
+		    	if (isStart) {
 		    		removeSplashScreen();
 		    	}
 		    }
@@ -239,15 +256,6 @@ public class MainActivity extends FragmentActivity
 		task.execute(GetDealsTask.createRequest(1, mSelectedCity, mSelectedCategories));
 		
 		lockScreenOrientation();
-	}
-	
-	private void showTutorial() {
-		SharedPreferences prefs = getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE);
-		boolean tutorialCompleted = prefs.getBoolean("TUTORIAL_COMPLETED", false);
-		if (!tutorialCompleted && Utils.hasHoneycomb()) {
-			Intent tutorialIntent = new Intent(this, TutorialActivity.class);
-    		startActivityForResult(tutorialIntent, 2);
-		}
 	}
 	
 	private void getDealsCount() {
@@ -658,6 +666,8 @@ public class MainActivity extends FragmentActivity
 	    	progressDialog.dismiss();
 	    }
 	    progressDialog = null;
+	    
+	    mCheckUpdateHandler = null;
 	}
 	
 	@Override
@@ -780,10 +790,13 @@ public class MainActivity extends FragmentActivity
 		    	//Write your code if there's no result
 		    }
 		} else if (requestCode == 2) {
-			getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE)
-				.edit()
-				.putBoolean("TUTORIAL_COMPLETED", true)
-				.commit();
+			int versionNumber = getVersionNumber();
+			if (versionNumber > 0) {
+				getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE)
+					.edit()
+					.putInt("TUTORIAL_SHOWN_FOR_VERSION", versionNumber)
+					.commit();
+			}
 		}
 	}
 	
@@ -828,6 +841,96 @@ public class MainActivity extends FragmentActivity
 				DealSuggestionsProvider.AUTHORITY, DealSuggestionsProvider.MODE);
 		suggestions.clearHistory();
 	}
+	
+	protected int getVersionNumber() {
+        try {
+            return this.getPackageManager().getPackageInfo(
+                    this.getPackageName(), 0).versionCode;
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            return -1;
+        }
+    }
+	
+	private void showTutorial() {
+		SharedPreferences prefs = getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE);
+		int versionNumber = getVersionNumber();
+		int tutorialShownForVersion = prefs.getInt("TUTORIAL_SHOWN_FOR_VERSION", -1);
+		if (versionNumber > tutorialShownForVersion && Utils.hasHoneycomb()) {
+			Intent tutorialIntent = new Intent(this, TutorialActivity.class);
+    		startActivityForResult(tutorialIntent, 2);
+		}
+	}
+	
+	private void showUpdate() {
+		SharedPreferences prefs = getSharedPreferences("gr.unfold.android.tsibato.settings", MODE_PRIVATE);
+		long lastCheckUpdateTime =  prefs.getLong("LAST_CHECK_UPDATE_TIME", 0);
+		
+		if ((lastCheckUpdateTime + DAY_MILLIS) < System.currentTimeMillis()) {
+		//if ((lastCheckUpdateTime) < System.currentTimeMillis()) {	
+			
+			checkUpdate.start();
+			
+			lastCheckUpdateTime = System.currentTimeMillis();            
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putLong("LAST_CHECK_UPDATE_TIME", lastCheckUpdateTime);
+            editor.commit();
+		}
+	}
+	
+	/* This Thread checks for Updates in the Background */
+    private Thread checkUpdate = new Thread() {
+        public void run() {
+        	HttpClient httpclient = new DefaultHttpClient();
+            HttpResponse response;
+            String uri = CURRENT_VERSION_URL;
+            try {
+                response = httpclient.execute(new HttpGet(uri));
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                response.getEntity().writeTo(out);
+                out.close();
+                String responseString = out.toString();
+                
+                int currentVersion = getVersionNumber();
+                int latestVersion = -1;
+                try {
+                	latestVersion = Integer.parseInt(responseString);
+                } catch (NumberFormatException ex) {}
+                
+                if (latestVersion > currentVersion) {
+                	if (mCheckUpdateHandler != null) {
+                		mCheckUpdateHandler.post(showUpdate);
+                	}
+                }
+                
+            } catch (Exception e) {
+            }
+        }
+    };
+    
+    /* This Runnable creates a Dialog and asks the user to open the Market */ 
+    private Runnable showUpdate = new Runnable(){
+           public void run(){
+        	   if (mCheckUpdateHandler != null) {
+		            new AlertDialog.Builder(MainActivity.this)
+		            .setIcon(R.drawable.ic_launcher)
+		            .setTitle(getString(R.string.update_title))
+		            .setMessage(getString(R.string.update_text))
+		            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		                    public void onClick(DialogInterface dialog, int whichButton) {
+		                            /* User clicked OK so do some stuff */
+		                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + MainActivity.this.getPackageName()));
+		                            startActivity(intent);
+		                    }
+		            })
+		            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		                    public void onClick(DialogInterface dialog, int whichButton) {
+		                            /* User clicked Cancel */
+		                    }
+		            })
+		            .show();
+        	   }
+           }
+    };
 	
 	public class ListMapPagerAdapter extends FragmentPagerAdapter {
         public ListMapPagerAdapter(FragmentManager fm) {

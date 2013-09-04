@@ -27,5 +27,7 @@
     <string name="settings_cancel">Ακύρωση</string>
     <string name="settings_ok">OK</string>
     <string name="tutorial_ok">OK!</string>
+    <string name="update_title">Update available</string>
+    <string name="update_text">An update for Tsibato is available!\n\nUpdate from Google Play Store?</string>
 
 </resources>
