@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+tsibato-android.apk
 *.keystore
 *.pydevproject
 .project

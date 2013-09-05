@@ -149,6 +149,10 @@ public class MainActivity extends FragmentActivity
 	            	
 	            	setDealsCount();
 	            	
+	            	if (mQuery != null) {
+	            		setHomeOnSearch();
+	            	}
+	            	
 	            	return;
             	}
             }
@@ -866,7 +870,6 @@ public class MainActivity extends FragmentActivity
 		long lastCheckUpdateTime =  prefs.getLong("LAST_CHECK_UPDATE_TIME", 0);
 		
 		if ((lastCheckUpdateTime + DAY_MILLIS) < System.currentTimeMillis()) {
-		//if ((lastCheckUpdateTime) < System.currentTimeMillis()) {	
 			
 			checkUpdate.start();
 			
